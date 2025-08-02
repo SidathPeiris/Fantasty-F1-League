@@ -36,11 +36,34 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **💾 SQLite3 Database** - Simple and reliable data storage
 - **📦 Importmap** - Modern JavaScript package management
 - **🚀 Puma Server** - Fast development web server
+- **🎨 Tailwind CSS** - Modern, responsive design system
+- **🔐 User Authentication** - Complete signup/login system with bcrypt
+- **🏠 Dashboard** - Comprehensive user dashboard with F1-themed design
+- **📱 Responsive Design** - Works perfectly on all devices
+
+### 🔐 **Authentication System**
+- **👤 User Registration** - Sign up with full name, email, username, and password
+- **🔑 Secure Login** - Login with email or username and password
+- **🔒 Password Security** - Bcrypt hashing for secure password storage
+- **💾 Session Management** - Persistent user sessions
+- **🚪 Logout Functionality** - Secure logout with redirect to landing page
+- **✅ Form Validation** - Comprehensive validation for all user inputs
+- **🎨 Beautiful UI** - F1-themed design for all authentication pages
+
+### 🏠 **Dashboard Features**
+- **🏎️ F1 Command Center** - Comprehensive dashboard with all app functions
+- **👤 My Team** - Manage fantasy drivers and constructors
+- **⏰ Live Races** - Watch real-time race updates and scoring
+- **🏆 Leaderboard** - See rankings and personal stats
+- **👤 Driver Database** - Browse all F1 drivers and stats
+- **🏭 Constructor Database** - Explore F1 teams and performance
+- **⚙️ Settings** - Account management and preferences
+- **📊 Quick Stats** - Current rank, total points, races completed, podium finishes
+- **📝 Recent Activity** - Track points earned, driver transfers, ranking changes
 
 ### 🎮 **Upcoming Fantasy League Features**
 
 #### **Core Features**
-- **👤 User Authentication** - Sign up, login, and user profiles
 - **🏎️ F1 Teams & Drivers Database** - Complete current F1 data
 - **⚔️ Fantasy Team Creation** - Users build their fantasy teams
 - **🏁 Race Results Tracking** - Real-time race outcomes and points
@@ -51,37 +74,76 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **⚡ Real-time Race Updates** - Turbo Streams for live race day
 - **📈 Driver Performance Analytics** - Historical data and trends
 - **🔄 Team Management** - Add/drop drivers, transfer windows
-- **⚙️ League Settings** - Customizable scoring and rules
-- **📱 Mobile Responsive** - Works perfectly on all devices
-- **🔔 Push Notifications** - Race start alerts and results
-
-#### **Technical Features**
-- **🎨 Tailwind CSS** - Modern, responsive styling
-- **🔌 RESTful API** - Clean, well-structured endpoints
-- **🗄️ Database Migrations** - Version-controlled schema changes
-- **🧪 Testing Suite** - Comprehensive test coverage
-- **🚀 Deployment Ready** - Kamal configuration included
+- **🏆 Season Championships** - Multiple championship formats
+- **📱 Mobile App** - Native mobile experience
+- **🔔 Push Notifications** - Race alerts and updates
+- **📊 Advanced Statistics** - Detailed performance metrics
+- **🎯 Predictions** - User race predictions and scoring
 
 ## 🛠️ Technology Stack
 
-| Component | Technology | Version |
-|-----------|------------|---------|
-| **Backend** | Ruby on Rails | 8.0.2 |
-| **Database** | SQLite3 (dev) / PostgreSQL (prod) | Latest |
-| **Frontend** | Hotwire, Stimulus, Tailwind CSS | Latest |
-| **JavaScript** | Importmap | Latest |
-| **Server** | Puma | Latest |
-| **Deployment** | Kamal | Included |
+### **Backend**
+- **Ruby 3.4.4** - Latest Ruby version with performance improvements
+- **Rails 8.0.2** - Modern Rails framework with Hotwire
+- **SQLite3** - Lightweight database for development
+- **bcrypt** - Secure password hashing
+- **Puma** - High-performance web server
 
-## 📦 Installation
+### **Frontend**
+- **Tailwind CSS 3.3.1** - Utility-first CSS framework
+- **Hotwire/Turbo** - Real-time updates without JavaScript
+- **Stimulus** - Lightweight JavaScript framework
+- **Importmap** - Modern JavaScript package management
+
+### **Development Tools**
+- **Brakeman** - Security vulnerability scanner
+- **RuboCop** - Ruby code style checker
+- **Debug** - Enhanced debugging experience
+- **Web Console** - Interactive console on error pages
+
+## 📁 Project Structure
+
+```
+Fantasty-F1-League/
+├── app/
+│   ├── controllers/
+│   │   ├── application_controller.rb
+│   │   ├── pages_controller.rb
+│   │   ├── sessions_controller.rb
+│   │   └── users_controller.rb
+│   ├── models/
+│   │   └── user.rb
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   └── application.html.erb
+│   │   ├── pages/
+│   │   │   ├── dashboard.html.erb
+│   │   │   ├── home.html.erb
+│   │   │   ├── login.html.erb
+│   │   │   └── signup.html.erb
+│   │   └── sessions/
+│   └── assets/
+│       └── stylesheets/
+│           └── application.tailwind.css
+├── config/
+│   ├── routes.rb
+│   └── tailwind.config.js
+├── db/
+│   ├── migrate/
+│   │   └── 20250802111200_create_users.rb
+│   └── schema.rb
+└── README.md
+```
+
+## 🚀 Getting Started
 
 ### **Prerequisites**
-- Ruby 3.4.4+
-- Rails 8.0.2+
-- Node.js (for asset compilation)
-- Git
+- Ruby 3.4.4 or higher
+- Rails 8.0.2 or higher
+- SQLite3
+- Node.js (for Tailwind CSS)
 
-### **Setup Instructions**
+### **Installation**
 
 1. **Clone the repository**
    ```bash
@@ -100,22 +162,66 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
    rails db:migrate
    ```
 
-4. **Start the development server**
+4. **Build Tailwind CSS**
+   ```bash
+   bin/rails tailwindcss:build
+   ```
+
+5. **Start the development server**
    ```bash
    rails s
    ```
 
-5. **Visit the application**
+6. **Visit the application**
    Open your browser and go to `http://localhost:3000`
 
-## 🎮 Development Workflow
+### **Creating Your First Account**
 
-### **Starting the Server**
+1. **Visit the signup page** - Click "Get Started" on the landing page
+2. **Fill in your details**:
+   - Full Name: Your complete name
+   - Email: Your email address
+   - Username: Choose a unique username
+   - Password: Create a strong password
+3. **Submit the form** - You'll be automatically logged in and redirected to the dashboard
+4. **Explore the dashboard** - Check out all the F1 features available
+
+## 🎨 Design System
+
+### **F1 Theme**
+- **🏎️ Racing Red** - Primary brand color (#dc2626)
+- **⚫ Dark Background** - Professional dark theme
+- **🎯 Gradient Effects** - Modern gradient backgrounds
+- **📱 Responsive** - Works perfectly on all devices
+
+### **Typography**
+- **Orbitron** - Futuristic font for headings
+- **Inter** - Clean, readable font for body text
+- **Consistent Hierarchy** - Clear visual hierarchy
+
+### **Components**
+- **Buttons** - Gradient buttons with hover effects
+- **Cards** - F1-themed dashboard cards
+- **Forms** - Styled input fields with validation
+- **Navigation** - Intuitive navigation system
+
+## 🔧 Development
+
+### **Running Tests**
 ```bash
-rails s
+bin/rails test
 ```
 
-### **Database Operations**
+### **Code Quality**
+```bash
+# Run RuboCop
+bundle exec rubocop
+
+# Run Brakeman security scan
+bundle exec brakeman
+```
+
+### **Database Management**
 ```bash
 # Create database
 rails db:create
@@ -125,106 +231,34 @@ rails db:migrate
 
 # Reset database
 rails db:reset
+
+# Seed data (when available)
+rails db:seed
 ```
-
-### **Adding New Features**
-```bash
-# Generate a new model
-rails generate model ModelName
-
-# Generate a new controller
-rails generate controller ControllerName
-
-# Generate a new migration
-rails generate migration MigrationName
-```
-
-## 🏗️ Project Structure
-
-```
-Fantasty-F1-League/
-├── 📁 app/                    # Application code
-│   ├── 📁 controllers/       # Controllers
-│   ├── 📁 models/           # Database models
-│   ├── 📁 views/            # View templates
-│   └── 📁 assets/           # CSS, JS, images
-├── 📁 config/               # Configuration files
-├── 📁 db/                   # Database files
-├── 📁 lib/                  # Library modules
-├── 📁 public/               # Static files
-├── 📁 test/                 # Test files
-└── 📁 vendor/               # Third-party code
-```
-
-## 🎯 Roadmap
-
-### **Phase 1: Foundation** ✅
-- [x] Rails 8 application setup
-- [x] Database configuration
-- [x] Basic project structure
-- [x] Development environment
-
-### **Phase 2: Core Features** 🚧
-- [ ] User authentication system
-- [ ] F1 teams and drivers database
-- [ ] Basic fantasy team creation
-- [ ] Simple race results tracking
-
-### **Phase 3: Advanced Features** 📋
-- [ ] Real-time updates with Turbo Streams
-- [ ] Live leaderboards
-- [ ] Driver performance analytics
-- [ ] Admin panel for data management
-
-### **Phase 4: Polish & Deploy** 📋
-- [ ] Mobile responsive design
-- [ ] Push notifications
-- [ ] Performance optimization
-- [ ] Production deployment
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit your changes** (`git commit -m 'Add amazing feature'`)
-4. **Push to the branch** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
+## 📝 License
 
-### **Development Guidelines**
-- Follow Rails conventions
-- Write tests for new features
-- Update documentation
-- Keep commits clean and descriptive
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📄 License
+## 🙏 Acknowledgments
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## 🏆 About
-
-**Fantasy F1 League** is a comprehensive web application that allows users to create and manage fantasy Formula 1 teams. Built with modern Rails 8 features, it provides a smooth, real-time experience for F1 fans to compete in their own fantasy league.
-
-### **Key Benefits**
-- **⚡ Real-time Updates** - Live race data and standings
-- **👥 User-Friendly** - Intuitive interface for all skill levels
-- **📈 Scalable** - Built to handle growing user bases
-- **🛠️ Modern** - Latest web technologies and best practices
+- **Formula 1** - For the inspiration and racing excitement
+- **Rails Team** - For the amazing framework
+- **Tailwind CSS** - For the beautiful design system
+- **Open Source Community** - For all the amazing tools and libraries
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/SidathPeiris/Fantasty-F1-League/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/SidathPeiris/Fantasty-F1-League/discussions)
-- **Email**: sidathpeiris@gmail.com
+If you have any questions or need help, please open an issue on GitHub or contact the development team.
 
 ---
 
-<div align="center">
-
-**Built with ❤️ using Ruby on Rails 8**
-
-[![GitHub stars](https://img.shields.io/github/stars/SidathPeiris/Fantasty-F1-League?style=social)](https://github.com/SidathPeiris/Fantasty-F1-League)
-[![GitHub forks](https://img.shields.io/badge/github-forks-blue?style=social)](https://github.com/SidathPeiris/Fantasty-F1-League)
-
-</div>
+**🏎️ Ready to start your Fantasy F1 journey? Sign up today and join the race! 🏁**
