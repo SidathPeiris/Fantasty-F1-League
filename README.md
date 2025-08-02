@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # README
 
 This README would normally document whatever steps are necessary to get the
@@ -22,3 +23,7 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+=======
+# Fantasty-F1-League
+A F1 fantasy league project.
+>>>>>>> e67ef2425fdafc2c5b58b10bc94c0ea306d76737
