@@ -61,19 +61,28 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **📊 Quick Stats** - Current rank, total points, races completed, podium finishes
 - **📝 Recent Activity** - Track points earned, driver transfers, ranking changes
 
+### 🏎️ **F1 Data Management System** ✅
+- **📊 Complete F1 Database** - All 20 drivers and 10 constructors with real data
+- **💰 Dynamic Pricing System** - Driver and constructor costs based on performance
+- **📈 Rating Calculations** - Sophisticated algorithm considering performance, championship position, and history
+- **🏆 Championship Integration** - Real-time standings from RacingNews365
+- **🔄 Automatic Updates** - Scheduled race result imports and rating recalculations
+- **⚙️ Admin Panel** - Comprehensive admin interface for data management
+- **📊 Rating Summary** - Detailed breakdown of all driver and constructor ratings
+- **🧮 Driver Calculations** - In-depth analysis of rating and price calculations
+- **🎯 Price Organization** - All pages sorted by cost for strategic team building
+
 ### 🎮 **Upcoming Fantasy League Features**
 
 #### **Core Features**
-- **🏎️ F1 Teams & Drivers Database** - Complete current F1 data
 - **⚔️ Fantasy Team Creation** - Users build their fantasy teams
 - **🏁 Race Results Tracking** - Real-time race outcomes and points
 - **📊 Live Leaderboards** - Real-time standings and rankings
-- **⚙️ Admin Panel** - Manage races, results, and league settings
+- **🔄 Team Management** - Add/drop drivers, transfer windows
 
 #### **Advanced Features**
 - **⚡ Real-time Race Updates** - Turbo Streams for live race day
 - **📈 Driver Performance Analytics** - Historical data and trends
-- **🔄 Team Management** - Add/drop drivers, transfer windows
 - **🏆 Season Championships** - Multiple championship formats
 - **📱 Mobile App** - Native mobile experience
 - **🔔 Push Notifications** - Race alerts and updates
@@ -88,6 +97,7 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **SQLite3** - Lightweight database for development
 - **bcrypt** - Secure password hashing
 - **Puma** - High-performance web server
+- **Nokogiri** - Web scraping for F1 data integration
 
 ### **Frontend**
 - **Tailwind CSS 3.3.1** - Utility-first CSS framework
@@ -234,6 +244,53 @@ rails db:reset
 
 # Seed data (when available)
 rails db:seed
+```
+
+## 🎯 Roadmap
+
+### **Phase 1: Foundation** ✅
+- [x] Rails 8 application setup
+- [x] Database configuration
+- [x] Basic project structure
+- [x] Development environment
+
+### **Phase 2: Core Features** ✅
+- [x] User authentication system
+- [x] F1 teams and drivers database
+- [x] Dynamic pricing and rating system
+- [x] Admin panel for data management
+- [x] Rating summary and calculations
+- [x] Database consistency across all pages
+
+### **Phase 3: Advanced Features** 🚧
+- [ ] Fantasy team creation interface
+- [ ] Real-time race updates with Turbo Streams
+- [ ] Live leaderboards and rankings
+- [ ] Driver performance analytics
+- [ ] Team management (add/drop drivers)
+- [ ] Transfer windows and budget management
+
+### **Phase 4: Polish & Deploy** 📋
+- [ ] Mobile responsive optimization
+- [ ] Push notifications
+- [ ] Performance optimization
+- [ ] Production deployment
+
+## 🏗️ Project Structure
+
+```
+Fantasty-F1-League/
+├── 📁 app/                    # Application code
+│   ├── 📁 controllers/       # Controllers
+│   ├── 📁 models/           # Database models
+│   ├── 📁 views/            # View templates
+│   └── 📁 assets/           # CSS, JS, images
+├── 📁 config/               # Configuration files
+├── 📁 db/                   # Database files
+├── 📁 lib/                  # Library modules
+├── 📁 public/               # Static files
+├── 📁 test/                 # Test files
+└── 📁 vendor/               # Third-party code
 ```
 
 ## 🤝 Contributing
