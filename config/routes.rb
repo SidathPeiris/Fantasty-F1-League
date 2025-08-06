@@ -11,6 +11,13 @@ Rails.application.routes.draw do
   get "signup", to: "pages#signup"
   get "login", to: "pages#login"
   get "dashboard", to: "pages#dashboard"
+  get "my-team", to: "pages#my_team"
+  post "update-ratings", to: "pages#update_ratings"
+          get "rating-summary", to: "pages#rating_summary"
+        get "driver-calculations", to: "pages#driver_calculations"
+        get "admin", to: "pages#admin_panel"
+        post "update-standings", to: "pages#update_standings"
+        post "check-new-results", to: "pages#check_new_results"
 
   # User registration
   post "users", to: "users#create"

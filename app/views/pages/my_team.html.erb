@@ -1,0 +1,161 @@
+<!-- My Team Page -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+  <%= render 'shared/header' %>
+
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
+        <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+          Fantasy F1 League
+        </a>
+        <h1 class="text-5xl font-bold text-white flex-1 text-center">🏎️ My Fantasy Team</h1>
+        <div class="w-64"></div>
+      </div>
+      <p class="text-xl text-gray-300">Build your dream team and dominate the championship!</p>
+    </div>
+
+    <!-- Team Status Section -->
+    <div class="max-w-4xl mx-auto mb-12">
+      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
+        <div class="text-center">
+          <div class="w-20 h-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-white mb-4">No Team Registered</h2>
+          <p class="text-gray-400 mb-8">You haven't created your fantasy team yet. Start building your championship-winning squad!</p>
+          <button class="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-4 px-8 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+            Create My Team
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Building Guide -->
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">How Fantasy F1 Works</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Drivers Selection -->
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+              </svg>
+            </div>
+                         <h3 class="text-xl font-bold text-white mb-2">Select 2 Drivers</h3>
+             <p class="text-gray-400 text-sm">Choose from all 20 F1 drivers. Mix of top performers and value picks.</p>
+          </div>
+        </div>
+
+        <!-- Constructor Selection -->
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Pick 2 Constructors</h3>
+            <p class="text-gray-400 text-sm">Select two F1 teams. Balance between performance and budget.</p>
+          </div>
+        </div>
+
+        <!-- Budget Management -->
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Manage Budget</h3>
+            <p class="text-gray-400 text-sm">Stay within your $100M budget. Strategic spending is key!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+         <!-- Popular Driver Picks -->
+     <div class="mt-16 max-w-6xl mx-auto">
+       <h2 class="text-3xl font-bold text-white text-center mb-8">Popular Driver Picks</h2>
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         
+         <% @popular_drivers.each do |driver| %>
+           <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105">
+             <div class="text-center">
+               <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4 border-2 border-red-500 pt-5">
+                 <img src="<%= get_driver_photo_url(driver.name) %>" alt="<%= driver.name %>" class="w-full h-full object-cover">
+               </div>
+               <h3 class="text-lg font-bold text-white mb-1"><%= driver.name %></h3>
+               <p class="text-gray-400 text-sm mb-2"><%= driver.team %></p>
+               <div class="flex justify-center items-center text-sm space-x-4">
+                 <span class="text-green-400">$<%= driver.current_price %>M</span>
+                 <span style="color: #fbbf24;">★ <%= driver.current_rating %></span>
+               </div>
+             </div>
+           </div>
+         <% end %>
+       </div>
+     </div>
+
+         <!-- Constructor Options -->
+     <div class="mt-16 max-w-6xl mx-auto">
+       <h2 class="text-3xl font-bold text-white text-center mb-8">Constructor Options</h2>
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+         
+         <% @popular_constructors.each do |constructor| %>
+           <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105">
+             <div class="text-center">
+               <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 p-2">
+                 <img src="<%= get_constructor_logo_url(constructor.name) %>" alt="<%= constructor.name %>" class="w-full h-full object-contain">
+               </div>
+               <h3 class="text-lg font-bold text-white mb-1"><%= constructor.name %></h3>
+               <p class="text-gray-400 text-sm mb-2"><%= constructor.name %></p>
+               <div class="flex justify-center items-center text-sm space-x-4">
+                 <span class="text-green-400">$<%= constructor.current_price %>M</span>
+                 <span style="color: #fbbf24;">★ <%= constructor.current_rating %></span>
+               </div>
+             </div>
+           </div>
+         <% end %>
+       </div>
+     </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-16 max-w-4xl mx-auto">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">Quick Actions</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="/dashboard" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Back to Dashboard</h3>
+          <p class="text-gray-400">Return to your command center</p>
+        </a>
+        
+                 <a href="https://www.formula1.com/en/drivers" target="_blank" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+           <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
+             <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+               <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+             </svg>
+           </div>
+           <h3 class="text-xl font-bold text-white mb-2">Browse All Drivers</h3>
+           <p class="text-gray-400">Explore complete driver database</p>
+         </a>
+      </div>
+    </div>
+    
+
+    
+    <!-- Bottom Padding -->
+    <div class="pb-16"></div>
+  </div>
+</div> 

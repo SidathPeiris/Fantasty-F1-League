@@ -1,0 +1,100 @@
+<!-- Rating Summary Page -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+  <%= render 'shared/header' %>
+
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
+        <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+          Fantasy F1 League
+        </a>
+        <h1 class="text-5xl font-bold text-white flex-1 text-center">📊 Rating Summary</h1>
+        <div class="w-64"></div>
+      </div>
+      <p class="text-xl text-gray-300">Current driver and constructor ratings based on recent performance</p>
+      <p class="text-sm text-gray-400 mt-2">Last updated: <%= @summary[:updated_at].strftime("%B %d, %Y at %I:%M %p") %></p>
+    </div>
+
+    <!-- Driver Ratings -->
+    <div class="max-w-6xl mx-auto mb-12">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">Driver Ratings & Prices</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @summary[:drivers].each do |driver| %>
+          <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
+            <div class="text-center">
+              <h3 class="text-lg font-bold text-white mb-2"><%= driver[:name] %></h3>
+              <p class="text-gray-400 text-sm mb-4"><%= driver[:team] %></p>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-amber-400 mb-1">★ <%= driver[:current_rating] %></div>
+                  <div class="text-gray-400">Rating</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-400 mb-1">$<%= driver[:current_price] %>M</div>
+                  <div class="text-gray-400">Price</div>
+                </div>
+              </div>
+              <div class="mt-4 text-center">
+                <span class="text-blue-400 text-sm">Championship: #<%= driver[:championship_position] || 'N/A' %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Constructor Ratings -->
+    <div class="max-w-6xl mx-auto mb-12">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">Constructor Ratings & Prices</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @summary[:constructors].each do |constructor| %>
+          <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
+            <div class="text-center">
+              <h3 class="text-lg font-bold text-white mb-2"><%= constructor[:name] %></h3>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-amber-400 mb-1">★ <%= constructor[:current_rating] %></div>
+                  <div class="text-gray-400">Rating</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-400 mb-1">$<%= constructor[:current_price] %>M</div>
+                  <div class="text-gray-400">Price</div>
+                </div>
+              </div>
+              <div class="mt-4 text-center">
+                <span class="text-blue-400 text-sm">Championship: #<%= constructor[:championship_position] || 'N/A' %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="/my-team" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Back to My Team</h3>
+          <p class="text-gray-400">Return to team building</p>
+        </a>
+        
+        <a href="/dashboard" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Dashboard</h3>
+          <p class="text-gray-400">Return to command center</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</div> 

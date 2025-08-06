@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  team: MyString
+  base_price: 1
+  current_rating: 9.99
+
+two:
+  name: MyString
+  team: MyString
+  base_price: 1
+  current_rating: 9.99

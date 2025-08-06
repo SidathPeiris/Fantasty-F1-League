@@ -1,0 +1,94 @@
+<!-- Admin Panel -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+  <%= render 'shared/header' %>
+
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-12">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
+        <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+          Fantasy F1 League
+        </a>
+        <h1 class="text-5xl font-bold text-white flex-1 text-center">⚙️ Admin Panel</h1>
+        <div class="w-64"></div>
+      </div>
+      <p class="text-xl text-gray-300">Manage F1 data, ratings, and race results</p>
+      <% if @ratings_updated %>
+        <div class="mt-4 p-4 bg-green-800 border border-green-600 rounded-lg">
+          <p class="text-green-200 text-center">✅ Ratings and costs automatically updated!</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Admin Controls -->
+    <div class="max-w-4xl mx-auto mb-12">
+      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
+        <h2 class="text-3xl font-bold text-white text-center mb-8">Admin Controls</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- View Rating Summary -->
+          <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-6 rounded-xl border border-blue-600">
+            <h3 class="text-xl font-bold text-white mb-4">Rating Summary</h3>
+            <p class="text-gray-300 text-sm mb-4">View current ratings and prices for all drivers and constructors</p>
+            <a href="/rating-summary" class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-center">
+              View Summary
+            </a>
+          </div>
+
+          <!-- Driver Calculations -->
+          <div class="bg-gradient-to-br from-purple-800 to-purple-900 p-6 rounded-xl border border-purple-600">
+            <h3 class="text-xl font-bold text-white mb-4">Driver Calculations</h3>
+            <p class="text-gray-300 text-sm mb-4">Detailed breakdown of how each driver's rating and price is calculated</p>
+            <a href="/driver-calculations" class="block w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-center">
+              View Calculations
+            </a>
+          </div>
+        </div>
+
+        <!-- Automatic Race Results Check -->
+        <div class="mt-8 bg-gradient-to-br from-green-800 to-green-900 p-6 rounded-xl border border-green-600">
+          <h3 class="text-xl font-bold text-white mb-4">🔄 Automatic Race Results Check</h3>
+          <p class="text-gray-300 text-sm mb-4">Check RacingNews365 for new race results and automatically import them. This should be done every Monday at 9am after race weekends.</p>
+          <%= form_with url: "/check-new-results", method: :post, local: true do |form| %>
+            <%= form.submit "Check for New Race Results", class: "w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-bold py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
+          <% end %>
+        </div>
+
+        <!-- Manual Standings Update -->
+        <div class="mt-8 bg-gradient-to-br from-orange-800 to-orange-900 p-6 rounded-xl border border-orange-600">
+          <h3 class="text-xl font-bold text-white mb-4">📊 Manual Standings Update</h3>
+          <p class="text-gray-300 text-sm mb-4">Manually update championship standings from RacingNews365 to refresh all ratings and costs</p>
+          <%= form_with url: "/update-standings", method: :post, local: true do |form| %>
+            <%= form.submit "Update Standings Manually", class: "w-full bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-3 px-6 rounded-lg hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="/dashboard" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Back to Dashboard</h3>
+          <p class="text-gray-400">Return to command center</p>
+        </a>
+        
+        <a href="/my-team" class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105 text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">My Team</h3>
+          <p class="text-gray-400">View team building page</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</div> 
