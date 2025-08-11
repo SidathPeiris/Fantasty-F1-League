@@ -3,17 +3,24 @@
   <%= render 'shared/header' %>
 
   <!-- Main Content -->
-  <div class="container mx-auto px-4 py-12">
-    <!-- Welcome Section -->
-    <div class="text-center mb-12">
-      <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
-        <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-          Fantasy F1 League
-        </a>
-        <h1 class="text-5xl font-bold text-white flex-1 text-center">🏎️ Your F1 Command Center</h1>
-        <div class="w-64"></div>
+  <div class="container mx-auto px-4 py-8">
+    <!-- Welcome Message -->
+    <% if current_user && notice %>
+      <div id="welcome-dialog" class="max-w-4xl mx-auto mb-8 transition-all duration-1000 ease-in-out opacity-100">
+        <div class="bg-gradient-to-br from-red-800 to-red-900 p-8 rounded-2xl border border-red-600 shadow-2xl">
+          <div class="text-center">
+            <p class="text-xl text-gray-300 mb-6">Ready to dominate the Fantasy F1 League? Let's get started!</p>
+            <div class="bg-green-600 text-white p-4 rounded-lg mb-4">
+              <p class="text-lg font-semibold"><%= notice %></p>
+            </div>
+          </div>
+        </div>
       </div>
-      <p class="text-xl text-gray-300">Manage your fantasy team, track races, and dominate the leaderboard!</p>
+    <% end %>
+
+    <!-- Welcome Section -->
+    <div id="main-content" class="text-center mb-12 transition-all duration-1000 ease-in-out">
+      <%= render 'shared/page_header', title: '🏎️ Your F1 Command Center', subtitle: 'Manage your fantasy team, track races, and dominate the leaderboard!' %>
     </div>
 
     <!-- Dashboard Grid -->
@@ -28,15 +35,29 @@
             </svg>
           </div>
           <h3 class="text-2xl font-bold text-white mb-2">My Team</h3>
-          <p class="text-gray-400">Manage your fantasy drivers and constructors</p>
+          <% if @has_team %>
+            <p class="text-green-400 font-semibold">✓ Team Active</p>
+            <p class="text-gray-400 text-sm">Manage your fantasy drivers and constructors</p>
+          <% else %>
+            <p class="text-blue-400 font-semibold">No Team Yet</p>
+            <p class="text-gray-400 text-sm">Create your first fantasy team</p>
+          <% end %>
         </div>
         <div class="space-y-3">
           <a href="/my-team" class="block w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-center">
             View Team
           </a>
-          <a href="#" class="block w-full py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transition-all duration-300 text-center">
-            Make Changes
-          </a>
+          <% if @has_team %>
+            <!-- User already has a team - show disabled button -->
+            <div class="block w-full py-3 bg-gray-500 text-gray-300 font-medium rounded-lg cursor-not-allowed text-center opacity-50">
+              ✓ Team Created
+            </div>
+          <% else %>
+            <!-- User doesn't have a team - show active button -->
+            <a href="/create-team" class="block w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl text-center">
+              Create Team
+            </a>
+          <% end %>
         </div>
       </div>
 
@@ -202,4 +223,31 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const welcomeDialog = document.getElementById('welcome-dialog');
+  const mainContent = document.getElementById('main-content');
+  
+  if (welcomeDialog) {
+    console.log('Welcome dialog found, starting fade timer...');
+    
+    // After 3 seconds, fade out the welcome dialog
+    setTimeout(function() {
+      console.log('Starting fade animation...');
+      welcomeDialog.style.opacity = '0';
+      welcomeDialog.style.transform = 'translateY(-20px)';
+      
+      // After fade animation completes, remove the dialog and move content up
+      setTimeout(function() {
+        console.log('Removing welcome dialog...');
+        welcomeDialog.style.display = 'none';
+        mainContent.style.marginTop = '0';
+      }, 1000);
+    }, 3000);
+  } else {
+    console.log('No welcome dialog found');
+  }
+});
+</script> 

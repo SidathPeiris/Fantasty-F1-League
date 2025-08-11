@@ -5,7 +5,7 @@ class UsersController < ApplicationController
     if @user.save
       # Log the user in after successful signup
       session[:user_id] = @user.id
-      redirect_to dashboard_path, notice: 'Account created successfully! Welcome to Fantasy F1 League! 🏎️'
+      redirect_to dashboard_path, notice: "Welcome to Fantasy F1 League, #{@user.full_name}! 🏎️ Your account has been created successfully!"
     else
       # If validation fails, redirect back to signup page
       redirect_to signup_path, alert: @user.errors.full_messages.join(', ')

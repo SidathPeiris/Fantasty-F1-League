@@ -1,4 +1,5 @@
 class Driver < ApplicationRecord
+  has_one_attached :photo
   has_many :driver_results, foreign_key: :driver, primary_key: :name
   
   validates :name, presence: true, uniqueness: true
@@ -11,27 +12,35 @@ class Driver < ApplicationRecord
   
   def update_rating_and_price!
     recent_performance = DriverResult.average_performance_for_driver(name, 5)
+    season_performance = DriverResult.average_performance_for_driver(name, 20) # Season-long performance
     championship_position = self.championship_position
     championships_won = get_championships_won
     
-    # Calculate new rating based on performance, championship position, and championship history
-    performance_rating = [(recent_performance / 5.0), 5.0].min
-    championship_rating = calculate_championship_rating(championship_position)
+    # Calculate rating components
     championship_history_rating = calculate_championship_history_rating(championships_won)
+    championship_position_rating = calculate_championship_rating(championship_position)
+    recent_performance_rating = [(recent_performance / 5.0), 5.0].min
+    season_performance_rating = [(season_performance / 5.0), 5.0].min
     
-    # Combine performance (60%), championship position (30%), and championship history (10%)
-    new_rating = (performance_rating * 0.6 + championship_rating * 0.3 + championship_history_rating * 0.1).round(1)
+    # NEW BALANCED SYSTEM: 10% history + 50% position + 30% recent + 10% season
+    new_rating = (
+      championship_history_rating * 0.1 +      # 10% - Championship history
+      championship_position_rating * 0.5 +     # 50% - Current championship position
+      recent_performance_rating * 0.3 +        # 30% - Last 5 races performance
+      season_performance_rating * 0.1          # 10% - Season-long performance
+    ).round(1)
+    
     new_rating = [new_rating, 1.0].max # Minimum rating of 1.0
     
-    # Calculate new price based on performance, rating, championship position, and championship history
-    performance_multiplier = recent_performance / 10.0 # Normalize to 0-2.5 range
-    rating_multiplier = new_rating / 2.5 # Normalize to 0-2 range
-    championship_multiplier = calculate_championship_multiplier(championship_position)
-    championship_history_multiplier = calculate_championship_history_multiplier(championships_won)
+    # NEW PRICING SYSTEM: Balanced for $100M budget
+    # Base price based on championship position and rating
+    base_price = calculate_base_price_from_position(championship_position)
     
-    new_price = (base_price * (1 + performance_multiplier + rating_multiplier + championship_multiplier + championship_history_multiplier)).round
+    # Apply rating multiplier (0.8x to 1.2x based on rating)
+    rating_multiplier = (new_rating / 5.0) * 0.4 + 0.8
+    new_price = (base_price * rating_multiplier).round
     
-    # Ensure price stays within reasonable bounds
+    # Ensure price stays within reasonable bounds for $100M budget
     new_price = [new_price, 50].min # Max $50M
     new_price = [new_price, 15].max # Min $15M
     
@@ -42,18 +51,20 @@ class Driver < ApplicationRecord
   end
   
   def current_price
-    # Calculate dynamic price based on recent performance, championship position, and championship history
-    recent_performance = DriverResult.average_performance_for_driver(name, 5)
+    # Calculate dynamic price based on championship position and rating
     championship_position = self.championship_position
-    championships_won = get_championships_won
     
-    performance_multiplier = recent_performance / 10.0
-    rating_multiplier = current_rating / 2.5
-    championship_multiplier = calculate_championship_multiplier(championship_position)
-    championship_history_multiplier = calculate_championship_history_multiplier(championships_won)
+    # Base price based on championship position
+    base_price = calculate_base_price_from_position(championship_position)
     
-    price = (base_price * (1 + performance_multiplier + rating_multiplier + championship_multiplier + championship_history_multiplier)).round
-    [price, 50].min # Cap at $50M
+    # Apply rating multiplier
+    rating_multiplier = (current_rating / 5.0) * 0.4 + 0.8
+    price = (base_price * rating_multiplier).round
+    
+    # Ensure price stays within reasonable bounds
+    price = [price, 50].min # Max $50M
+    price = [price, 15].max # Min $15M
+    price
   end
   
   def self.update_all_ratings!
@@ -65,6 +76,9 @@ class Driver < ApplicationRecord
   end
   
   def championship_position
+    # Use stored championship position from database if available
+    return self[:championship_position] if self[:championship_position].present?
+    
     # Try to get position from actual race results
     position_from_results = Driver.joins(:driver_results)
                                  .group('drivers.name')
@@ -74,7 +88,7 @@ class Driver < ApplicationRecord
     
     return position_from_results if position_from_results
     
-    # Fallback to current 2025 standings from RacingNews365
+    # Fallback to current 2025 standings from RacingNews365 (as of August 2025)
     current_standings = {
       "Oscar Piastri" => 1,
       "Lando Norris" => 2,
@@ -179,5 +193,22 @@ class Driver < ApplicationRecord
     return 0.15 if championships >= 3 # Few championships: +15% price boost
     return 0.1 if championships >= 1  # Single championship: +10% price boost
     return 0.0  # No championships: no boost
+  end
+
+  private
+  
+  def calculate_base_price_from_position(position)
+    return 50 if position.nil? || position == 0
+    
+    case position
+    when 1..2 then 50    # Top 2 drivers: $50M
+    when 3..4 then 40    # 3rd-4th: $40M
+    when 5..6 then 35    # 5th-6th: $35M
+    when 7..8 then 30    # 7th-8th: $30M
+    when 9..10 then 25   # 9th-10th: $25M
+    when 11..15 then 20  # 11th-15th: $20M
+    when 16..20 then 15  # 16th-20th: $15M
+    else 15
+    end
   end
 end

@@ -14,7 +14,7 @@
         <div class="w-64"></div>
       </div>
       <p class="text-xl text-gray-300">Current driver and constructor ratings based on recent performance</p>
-      <p class="text-sm text-gray-400 mt-2">Last updated: <%= @summary[:updated_at].strftime("%B %d, %Y at %I:%M %p") %></p>
+      <p class="text-sm text-gray-400 mt-2">Last updated: <%= @summary[:updated_at].in_time_zone('Australia/Sydney').strftime("%B %d, %Y at %I:%M %p AEST") %></p>
     </div>
 
     <!-- Driver Ratings -->
@@ -28,7 +28,7 @@
               <p class="text-gray-400 text-sm mb-4"><%= driver[:team] %></p>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-amber-400 mb-1">★ <%= driver[:current_rating] %></div>
+                  <div class="text-2xl font-bold mb-1" style="color: <%= get_rating_color(driver[:current_rating]) %>">★ <%= driver[:current_rating] %></div>
                   <div class="text-gray-400">Rating</div>
                 </div>
                 <div class="text-center">
@@ -55,7 +55,7 @@
               <h3 class="text-lg font-bold text-white mb-2"><%= constructor[:name] %></h3>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-amber-400 mb-1">★ <%= constructor[:current_rating] %></div>
+                  <div class="text-2xl font-bold mb-1" style="color: <%= get_rating_color(constructor[:current_rating]) %>">★ <%= constructor[:current_rating] %></div>
                   <div class="text-gray-400">Rating</div>
                 </div>
                 <div class="text-center">

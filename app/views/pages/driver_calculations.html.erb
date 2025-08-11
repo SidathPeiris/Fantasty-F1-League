@@ -14,6 +14,7 @@
         <div class="w-64"></div>
       </div>
       <p class="text-xl text-gray-300">Detailed breakdown of driver ratings and costs</p>
+      <p class="text-sm text-gray-400 mt-2">Last updated: <%= Time.current.in_time_zone('Australia/Sydney').strftime("%B %d, %Y at %I:%M %p AEST") %></p>
     </div>
 
     <!-- Driver Calculations -->
@@ -47,28 +48,14 @@
             </div>
             <div class="bg-gray-700 p-4 rounded-lg text-center">
               <div class="text-lg font-bold text-blue-400"><%= driver[:recent_performance_score] %></div>
-              <div class="text-gray-400 text-sm">Recent Performance</div>
+              <div class="text-gray-400 text-sm">Recent Performance (5 races)</div>
             </div>
           </div>
 
           <!-- Rating Breakdown -->
           <div class="mb-6">
-            <h3 class="text-xl font-bold text-white mb-4">Rating Calculation (60% Performance + 30% Position + 10% History)</h3>
+            <h3 class="text-xl font-bold text-white mb-4">Rating Calculation (10% History + 50% Position + 30% Recent + 10% Season)</h3>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div class="bg-gradient-to-br from-green-800 to-green-900 p-4 rounded-lg">
-                <div class="text-center">
-                  <div class="text-2xl font-bold text-green-400"><%= driver[:performance_rating] %></div>
-                  <div class="text-gray-300 text-sm">Performance</div>
-                  <div class="text-gray-400 text-xs">(60% weight)</div>
-                </div>
-              </div>
-              <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-4 rounded-lg">
-                <div class="text-center">
-                  <div class="text-2xl font-bold text-blue-400"><%= driver[:championship_rating] %></div>
-                  <div class="text-gray-300 text-sm">Position</div>
-                  <div class="text-gray-400 text-xs">(30% weight)</div>
-                </div>
-              </div>
               <div class="bg-gradient-to-br from-purple-800 to-purple-900 p-4 rounded-lg">
                 <div class="text-center">
                   <div class="text-2xl font-bold text-purple-400"><%= driver[:championship_history_rating] %></div>
@@ -76,39 +63,49 @@
                   <div class="text-gray-400 text-xs">(10% weight)</div>
                 </div>
               </div>
+              <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-4 rounded-lg">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-400"><%= driver[:championship_position_rating] %></div>
+                  <div class="text-gray-300 text-sm">Position</div>
+                  <div class="text-gray-400 text-xs">(50% weight)</div>
+                </div>
+              </div>
+              <div class="bg-gradient-to-br from-green-800 to-green-900 p-4 rounded-lg">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-400"><%= driver[:recent_performance_rating] %></div>
+                  <div class="text-gray-300 text-sm">Recent (5 races)</div>
+                  <div class="text-gray-400 text-xs">(30% weight)</div>
+                </div>
+              </div>
               <div class="bg-gradient-to-br from-amber-800 to-amber-900 p-4 rounded-lg">
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-amber-400"><%= driver[:final_rating] %></div>
-                  <div class="text-gray-300 text-sm">Final Rating</div>
-                  <div class="text-gray-400 text-xs">(Combined)</div>
+                  <div class="text-2xl font-bold text-amber-400"><%= driver[:season_performance_rating] %></div>
+                  <div class="text-gray-300 text-sm">Season</div>
+                  <div class="text-gray-400 text-xs">(10% weight)</div>
                 </div>
+              </div>
+            </div>
+            
+            <!-- Final Rating Display -->
+            <div class="text-center mt-4 mb-6">
+              <div class="bg-gradient-to-br from-red-800 to-red-900 p-4 rounded-lg inline-block">
+                <div class="text-3xl font-bold text-red-400">★ <%= driver[:final_rating] %></div>
+                <div class="text-gray-300 text-sm">Final Combined Rating</div>
               </div>
             </div>
           </div>
 
           <!-- Price Breakdown -->
           <div>
-            <h3 class="text-xl font-bold text-white mb-4">Price Calculation (Base + Performance + Rating + Position + History)</h3>
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <h3 class="text-xl font-bold text-white mb-4">Price Calculation (Base Price + Rating Multiplier)</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="bg-gray-700 p-3 rounded-lg text-center">
                 <div class="text-lg font-bold text-white">$<%= driver[:base_price] %>M</div>
-                <div class="text-gray-400 text-xs">Base Price</div>
+                <div class="text-gray-400 text-xs">Base Price (Position)</div>
               </div>
               <div class="bg-gray-700 p-3 rounded-lg text-center">
-                <div class="text-lg font-bold text-green-400">+<%= driver[:performance_multiplier] %></div>
-                <div class="text-gray-400 text-xs">Performance</div>
-              </div>
-              <div class="bg-gray-700 p-3 rounded-lg text-center">
-                <div class="text-lg font-bold text-blue-400">+<%= driver[:rating_multiplier] %></div>
-                <div class="text-gray-400 text-xs">Rating</div>
-              </div>
-              <div class="bg-gray-700 p-3 rounded-lg text-center">
-                <div class="text-lg font-bold text-purple-400">+<%= driver[:championship_multiplier] %></div>
-                <div class="text-gray-400 text-xs">Position</div>
-              </div>
-              <div class="bg-gray-700 p-3 rounded-lg text-center">
-                <div class="text-lg font-bold text-amber-400">+<%= driver[:championship_history_multiplier] %></div>
-                <div class="text-gray-400 text-xs">History</div>
+                <div class="text-lg font-bold text-blue-400">×<%= driver[:rating_multiplier] %></div>
+                <div class="text-gray-400 text-xs">Rating Multiplier</div>
               </div>
               <div class="bg-gradient-to-br from-green-800 to-green-900 p-3 rounded-lg text-center">
                 <div class="text-lg font-bold text-green-400">$<%= driver[:final_price] %>M</div>

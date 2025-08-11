@@ -10,45 +10,147 @@
         <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
           Fantasy F1 League
         </a>
-        <h1 class="text-5xl font-bold text-white flex-1 text-center">🏎️ My Fantasy Team</h1>
+        <h1 class="text-5xl font-bold text-white flex-1 text-center">🏎️ My Team</h1>
         <div class="w-64"></div>
       </div>
-      <p class="text-xl text-gray-300">Build your dream team and dominate the championship!</p>
+      <p class="text-xl text-gray-300">Build your dream F1 team with the best drivers and constructors</p>
     </div>
 
     <!-- Team Status Section -->
-    <div class="max-w-4xl mx-auto mb-12">
-      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
-        <div class="text-center">
-          <div class="w-20 h-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
-            </svg>
+    <% if @user_team %>
+      <!-- User has a team - show team details -->
+      <div class="max-w-4xl mx-auto mb-12">
+        <div class="bg-gradient-to-br from-gray-900 via-red-900 to-black p-8 rounded-2xl border border-red-600">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-4"><%= current_user.username %>'s Team</h2>
+            <p class="text-green-400 font-semibold text-lg mb-2">✓ Team Active</p>
+            <p class="text-gray-300">Total Cost: $<%= @user_team.total_cost %>M</p>
           </div>
-          <h2 class="text-3xl font-bold text-white mb-4">No Team Registered</h2>
-          <p class="text-gray-400 mb-8">You haven't created your fantasy team yet. Start building your championship-winning squad!</p>
-          <button class="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-4 px-8 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-            Create My Team
-          </button>
+          
+          <!-- Team Details Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Drivers Section -->
+            <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-6 rounded-xl border border-blue-600">
+              <h3 class="text-xl font-bold text-white mb-4 text-center">👤 Your Drivers</h3>
+              <div class="space-y-4">
+                <% @user_team.drivers.each do |driver| %>
+                  <% selection = @user_team.team_selections.find_by(selectable: driver) %>
+                  <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-4 rounded-lg border border-blue-500 hover:border-blue-400 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-400 flex items-center justify-center">
+                          <% if get_driver_photo_url(driver.name) %>
+                            <img src="<%= get_driver_photo_url(driver.name) %>" alt="<%= driver.name %>" class="w-full h-full object-cover">
+                          <% else %>
+                            <div class="text-sm font-bold text-gray-400">
+                              <%= driver.name.split(' ').map(&:first).join('') %>
+                            </div>
+                          <% end %>
+                        </div>
+                        <div>
+                          <h4 class="text-white font-semibold"><%= driver.name %></h4>
+                          <p class="text-blue-300 text-sm"><%= driver.team %></p>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-green-400 font-bold">$<%= selection.cost %>M</p>
+                        <p class="text-sm" style="color: <%= get_rating_color(driver.current_rating) %>">
+                          Rating: <%= driver.current_rating %>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Constructor Section -->
+            <div class="bg-gradient-to-br from-purple-800 to-purple-900 p-6 rounded-xl border border-purple-600">
+              <h3 class="text-xl font-bold text-white mb-4 text-center">🏭 Your Constructor</h3>
+              <% constructor = @user_team.constructors.first %>
+              <% if constructor %>
+                <% selection = @user_team.team_selections.find_by(selectable: constructor) %>
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-4 rounded-lg border border-purple-500 hover:border-purple-400 transition-all duration-300">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-purple-400 flex items-center justify-center">
+                        <% if get_constructor_logo_url(constructor.name) %>
+                          <img src="<%= get_constructor_logo_url(constructor.name) %>" alt="<%= constructor.name %>" class="w-full h-full object-cover">
+                        <% else %>
+                          <div class="text-sm font-bold text-gray-400">
+                            <%= constructor.name.split(' ').map(&:first).join('') %>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div>
+                        <h4 class="text-white font-semibold"><%= constructor.name %></h4>
+                        <p class="text-purple-300 text-sm">Constructor</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-green-400 font-bold">$<%= selection.cost %>M</p>
+                      <p class="text-sm" style="color: <%= get_rating_color(constructor.current_rating) %>">
+                        Rating: <%= constructor.current_rating %>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              <% else %>
+                <!-- Debug info to see what's happening -->
+                <div class="bg-red-900 p-4 rounded-lg border border-red-500">
+                  <p class="text-red-200 text-center">No constructor found</p>
+                  <p class="text-red-300 text-sm text-center">Team ID: <%= @user_team.id %></p>
+                  <p class="text-red-300 text-sm text-center">Team Selections: <%= @user_team.team_selections.count %></p>
+                  <p class="text-red-300 text-sm text-center">Constructor Selections: <%= @user_team.team_selections.where(selectable_type: 'Constructor').count %></p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Team Summary -->
+          <div class="mt-8 text-center">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-4 rounded-lg inline-block border border-gray-600">
+              <p class="text-white font-semibold">Team Status: <span class="text-green-400"><%= @user_team.status.capitalize %></span></p>
+              <p class="text-gray-300 text-sm">Created: <%= @user_team.created_at.strftime("%B %d, %Y") %></p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    <% else %>
+      <!-- User doesn't have a team - show create team message -->
+      <div class="max-w-4xl mx-auto mb-12">
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-gradient-to-r from-red-600 to-red-700 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+              </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-4">No Team Registered</h2>
+            <p class="text-gray-400 mb-8">You haven't created your fantasy team yet. Start building your championship-winning squad!</p>
+            <a href="/create-team" class="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-4 px-8 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl inline-block">
+              Create My Team
+            </a>
+          </div>
+        </div>
+      </div>
+    <% end %>
 
     <!-- Team Building Guide -->
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-3xl font-bold text-white text-center mb-8">How Fantasy F1 Works</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="max-w-6xl mx-auto mb-12">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">Team Building Guide</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <!-- Drivers Selection -->
+        <!-- Driver Selection -->
         <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300">
           <div class="text-center mb-4">
             <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
               </svg>
             </div>
-                         <h3 class="text-xl font-bold text-white mb-2">Select 2 Drivers</h3>
-             <p class="text-gray-400 text-sm">Choose from all 20 F1 drivers. Mix of top performers and value picks.</p>
+            <h3 class="text-xl font-bold text-white mb-2">Pick 2 Drivers</h3>
+            <p class="text-gray-400 text-sm">Select two F1 drivers. Consider ratings, prices, and team balance.</p>
           </div>
         </div>
 
@@ -57,11 +159,11 @@
           <div class="text-center mb-4">
             <div class="w-16 h-16 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
               </svg>
             </div>
-            <h3 class="text-xl font-bold text-white mb-2">Pick 2 Constructors</h3>
-            <p class="text-gray-400 text-sm">Select two F1 teams. Balance between performance and budget.</p>
+            <h3 class="text-xl font-bold text-white mb-2">Pick 1 Constructor</h3>
+            <p class="text-gray-400 text-sm">Select one F1 team. Balance between performance and budget.</p>
           </div>
         </div>
 
@@ -89,14 +191,20 @@
          <% @popular_drivers.each do |driver| %>
            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105">
              <div class="text-center">
-               <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4 border-2 border-red-500 pt-5">
-                 <img src="<%= get_driver_photo_url(driver.name) %>" alt="<%= driver.name %>" class="w-full h-full object-cover">
+               <div class="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4 border-2 border-red-500 flex items-center justify-center">
+                 <% if get_driver_photo_url(driver.name) %>
+                   <img src="<%= get_driver_photo_url(driver.name) %>" alt="<%= driver.name %>" class="w-full h-full object-cover">
+                 <% else %>
+                   <div class="text-2xl font-bold text-gray-500">
+                     <%= driver.name.split(' ').map(&:first).join('') %>
+                   </div>
+                 <% end %>
                </div>
                <h3 class="text-lg font-bold text-white mb-1"><%= driver.name %></h3>
                <p class="text-gray-400 text-sm mb-2"><%= driver.team %></p>
                <div class="flex justify-center items-center text-sm space-x-4">
                  <span class="text-green-400">$<%= driver.current_price %>M</span>
-                 <span style="color: #fbbf24;">★ <%= driver.current_rating %></span>
+                 <span style="color: <%= get_rating_color(driver.current_rating) %>;">★ <%= driver.current_rating %></span>
                </div>
              </div>
            </div>
@@ -113,13 +221,19 @@
            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 hover:border-red-500 transition-all duration-300 hover:transform hover:scale-105">
              <div class="text-center">
                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 p-2">
-                 <img src="<%= get_constructor_logo_url(constructor.name) %>" alt="<%= constructor.name %>" class="w-full h-full object-contain">
+                 <% if get_constructor_logo_url(constructor.name) %>
+                   <img src="<%= get_constructor_logo_url(constructor.name) %>" alt="<%= constructor.name %>" class="w-full h-full object-contain">
+                 <% else %>
+                   <div class="text-lg font-bold text-gray-500">
+                     <%= constructor.name.split(' ').map(&:first).join('') %>
+                   </div>
+                 <% end %>
                </div>
                <h3 class="text-lg font-bold text-white mb-1"><%= constructor.name %></h3>
                <p class="text-gray-400 text-sm mb-2"><%= constructor.name %></p>
                <div class="flex justify-center items-center text-sm space-x-4">
                  <span class="text-green-400">$<%= constructor.current_price %>M</span>
-                 <span style="color: #fbbf24;">★ <%= constructor.current_rating %></span>
+                 <span style="color: <%= get_rating_color(constructor.current_rating) %>;">★ <%= constructor.current_rating %></span>
                </div>
              </div>
            </div>

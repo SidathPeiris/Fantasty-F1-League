@@ -1,0 +1,13 @@
+<!-- Page Header Section -->
+<div class="text-center mb-12">
+  <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
+    <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+      Fantasy F1 League
+    </a>
+    <h1 class="text-5xl font-bold text-white flex-1 text-center"><%= title %></h1>
+    <div class="w-64"></div>
+  </div>
+  <% if local_assigns[:subtitle] %>
+    <p class="text-xl text-gray-300"><%= subtitle %></p>
+  <% end %>
+</div>

@@ -14,9 +14,10 @@
         <div class="w-64"></div>
       </div>
       <p class="text-xl text-gray-300">Manage F1 data, ratings, and race results</p>
+      <p class="text-sm text-gray-400 mt-2">Last updated: <%= Time.current.in_time_zone('Australia/Sydney').strftime("%B %d, %Y at %I:%M %p AEST") %></p>
       <% if @ratings_updated %>
         <div class="mt-4 p-4 bg-green-800 border border-green-600 rounded-lg">
-          <p class="text-green-200 text-center">✅ Ratings and costs automatically updated!</p>
+          <p class="text-green-200 text-center">✅ Ratings and costs updated after race results!</p>
         </div>
       <% end %>
     </div>
@@ -44,6 +45,15 @@
               View Calculations
             </a>
           </div>
+        </div>
+
+        <!-- Manual Rating Update -->
+        <div class="mt-8 bg-gradient-to-br from-red-800 to-red-900 p-6 rounded-xl border border-red-600">
+          <h3 class="text-xl font-bold text-white mb-4">🔄 Manual Rating Update</h3>
+          <p class="text-gray-300 text-sm mb-4">Update all driver and constructor ratings and prices. Only use this after importing new race results.</p>
+          <%= form_with url: "/update-ratings", method: :post, local: true do |form| %>
+            <%= form.submit "Update Ratings Manually", class: "w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
+          <% end %>
         </div>
 
         <!-- Automatic Race Results Check -->

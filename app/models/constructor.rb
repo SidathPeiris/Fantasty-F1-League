@@ -1,4 +1,5 @@
 class Constructor < ApplicationRecord
+  has_one_attached :logo
   has_many :constructor_results, foreign_key: :constructor, primary_key: :name
   
   validates :name, presence: true, uniqueness: true
@@ -9,26 +10,33 @@ class Constructor < ApplicationRecord
   
   def update_rating_and_price!
     recent_performance = ConstructorResult.average_performance_for_constructor(name, 5)
+    season_performance = ConstructorResult.average_performance_for_constructor(name, 20) # Season-long performance
     championship_position = self.championship_position
     
-    # Calculate new rating based on performance and championship position
-    performance_rating = [(recent_performance / 5.0), 5.0].min
-    championship_rating = calculate_championship_rating(championship_position)
+    # Calculate rating components
+    championship_position_rating = calculate_championship_rating(championship_position)
+    recent_performance_rating = [(recent_performance / 5.0), 5.0].min
+    season_performance_rating = [(season_performance / 5.0), 5.0].min
     
-    # Combine performance (70%) and championship position (30%)
-    new_rating = (performance_rating * 0.7 + championship_rating * 0.3).round(1)
+    # NEW BALANCED SYSTEM: 50% position + 30% recent + 20% season (no history for constructors)
+    new_rating = (
+      championship_position_rating * 0.5 +     # 50% - Current championship position
+      recent_performance_rating * 0.3 +        # 30% - Last 5 races performance
+      season_performance_rating * 0.2          # 20% - Season-long performance
+    ).round(1)
+    
     new_rating = [new_rating, 1.0].max # Minimum rating of 1.0
     
-    # Calculate new price based on performance, rating, and championship position
-    # Multipliers adjusted to be less aggressive
-    performance_multiplier = recent_performance / 20.0 # Normalize to 0-1.25 range
-    rating_multiplier = new_rating / 5.0 # Normalize to 0-1 range
-    championship_multiplier = calculate_championship_multiplier(championship_position) / 2
+    # NEW PRICING SYSTEM: Balanced for $100M budget
+    # Base price based on championship position and rating
+    base_price = calculate_base_price_from_position(championship_position)
     
-    new_price = (base_price * (1 + performance_multiplier + rating_multiplier + championship_multiplier)).round
+    # Apply rating multiplier (0.8x to 1.2x based on rating)
+    rating_multiplier = (new_rating / 5.0) * 0.4 + 0.8
+    new_price = (base_price * rating_multiplier).round
     
-    # Ensure price stays within reasonable bounds
-    new_price = [new_price, 30].min # Max $30M
+    # Ensure price stays within reasonable bounds for $100M budget
+    new_price = [new_price, 25].min # Max $25M
     new_price = [new_price, 5].max # Min $5M
     
     update!(
@@ -38,17 +46,20 @@ class Constructor < ApplicationRecord
   end
   
   def current_price
-    # Calculate dynamic price based on recent performance and championship position
-    recent_performance = ConstructorResult.average_performance_for_constructor(name, 5)
+    # Calculate dynamic price based on championship position and rating
     championship_position = self.championship_position
     
-    # Multipliers adjusted to be less aggressive
-    performance_multiplier = recent_performance / 20.0
-    rating_multiplier = current_rating / 5.0
-    championship_multiplier = calculate_championship_multiplier(championship_position) / 2
+    # Base price based on championship position
+    base_price = calculate_base_price_from_position(championship_position)
     
-    price = (base_price * (1 + performance_multiplier + rating_multiplier + championship_multiplier)).round
-    [price, 30].min # Cap at $30M
+    # Apply rating multiplier
+    rating_multiplier = (current_rating / 5.0) * 0.4 + 0.8
+    price = (base_price * rating_multiplier).round
+    
+    # Ensure price stays within reasonable bounds
+    price = [price, 25].min # Max $25M
+    price = [price, 5].max # Min $5M
+    price
   end
   
   def self.update_all_ratings!
@@ -60,6 +71,9 @@ class Constructor < ApplicationRecord
   end
   
   def championship_position
+    # Use stored championship position from database if available
+    return self[:championship_position] if self[:championship_position].present?
+    
     # Try to get position from actual race results
     position_from_results = Constructor.joins(:constructor_results)
                                      .group('constructors.name')
@@ -69,7 +83,7 @@ class Constructor < ApplicationRecord
     
     return position_from_results if position_from_results
     
-    # Fallback to current 2025 standings from RacingNews365
+    # Fallback to current 2025 standings from RacingNews365 (as of August 2025)
     current_standings = {
       "McLaren" => 1,
       "Ferrari" => 2,
@@ -77,7 +91,7 @@ class Constructor < ApplicationRecord
       "Red Bull Racing" => 4,
       "Williams" => 5,
       "Aston Martin" => 6,
-      "Stake F1 Team" => 7,
+      "Kick Sauber" => 7,
       "Haas" => 8,
       "Racing Bulls" => 9,
       "Alpine" => 10
@@ -106,18 +120,16 @@ class Constructor < ApplicationRecord
     end
   end
   
-  def calculate_championship_multiplier(position)
-    return 0.0 if position.nil? || position == 0
+  def calculate_base_price_from_position(position)
+    return 25 if position.nil? || position == 0
     
     case position
-    when 1 then 0.5
-    when 2 then 0.4
-    when 3 then 0.3
-    when 4 then 0.2
-    when 5 then 0.1
-    when 6..8 then 0.0
-    when 9..10 then -0.1
-    else -0.2
+    when 1 then 25    # Top constructor: $25M
+    when 2..3 then 20 # 2nd-3rd: $20M
+    when 4..5 then 15 # 4th-5th: $15M
+    when 6..7 then 12 # 6th-7th: $12M
+    when 8..10 then 8 # 8th-10th: $8M
+    else 5
     end
   end
 end

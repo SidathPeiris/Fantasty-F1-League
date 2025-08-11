@@ -1,10 +1,15 @@
 <!-- Header -->
 <div class="px-4 py-8 relative">
   <div class="absolute top-8 right-4 flex items-center space-x-4">
-    <span class="text-white text-xl font-semibold">Welcome, <%= current_user.full_name %>!</span>
-    <% if current_user.username == "SidathPeiris" %>
-      <%= link_to "Admin", admin_path, class: "text-blue-400 hover:text-blue-300 transition-colors duration-300 font-semibold" %>
+    <% if current_user %>
+      <span class="text-white text-xl font-semibold">Welcome, <%= current_user.full_name %>!</span>
+      <% if current_user.username == "SidathPeiris" %>
+        <%= link_to "Admin", admin_path, class: "text-blue-400 hover:text-blue-300 transition-colors duration-300 font-semibold" %>
+      <% end %>
+      <%= link_to "Logout", logout_path, data: { turbo_method: :delete }, class: "text-red-400 hover:text-red-300 transition-colors duration-300" %>
+    <% else %>
+      <span class="text-white text-xl font-semibold">Welcome to Fantasy F1!</span>
+      <%= link_to "Login", login_path, class: "text-blue-400 hover:text-blue-300 transition-colors duration-300 font-semibold" %>
     <% end %>
-    <%= link_to "Logout", logout_path, data: { turbo_method: :delete }, class: "text-red-400 hover:text-red-300 transition-colors duration-300" %>
   </div>
 </div> 

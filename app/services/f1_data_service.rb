@@ -31,63 +31,66 @@ class F1DataService
       end
     end
     
-    # Create drivers with base data
+    # Create drivers with base data (ratings will be calculated by the new system)
     drivers_data = [
-      { name: "Max Verstappen", team: "Red Bull Racing", base_price: 35, current_rating: 4.9 },
-      { name: "Lewis Hamilton", team: "Ferrari", base_price: 30, current_rating: 4.7 },
-      { name: "Charles Leclerc", team: "Ferrari", base_price: 28, current_rating: 4.6 },
-      { name: "Lando Norris", team: "McLaren", base_price: 25, current_rating: 4.5 },
-      { name: "Oscar Piastri", team: "McLaren", base_price: 22, current_rating: 4.4 },
-      { name: "George Russell", team: "Mercedes", base_price: 24, current_rating: 4.3 },
-      { name: "Carlos Sainz", team: "Williams", base_price: 20, current_rating: 4.2 },
-      { name: "Fernando Alonso", team: "Aston Martin", base_price: 18, current_rating: 4.1 },
-      { name: "Lance Stroll", team: "Aston Martin", base_price: 15, current_rating: 3.8 },
-      { name: "Alexander Albon", team: "Williams", base_price: 16, current_rating: 3.9 },
-      { name: "Yuki Tsunoda", team: "Red Bull Racing", base_price: 14, current_rating: 3.7 },
-      { name: "Nico Hulkenberg", team: "Kick Sauber", base_price: 12, current_rating: 3.5 },
-      { name: "Liam Lawson", team: "Racing Bulls", base_price: 13, current_rating: 3.6 },
-      { name: "Esteban Ocon", team: "Haas", base_price: 11, current_rating: 3.4 },
-      { name: "Pierre Gasly", team: "Alpine", base_price: 10, current_rating: 3.3 },
-      { name: "Kimi Antonelli", team: "Mercedes", base_price: 17, current_rating: 3.8 },
-      { name: "Gabriel Bortoleto", team: "Kick Sauber", base_price: 9, current_rating: 3.2 },
-      { name: "Isack Hadjar", team: "Racing Bulls", base_price: 8, current_rating: 3.1 },
-      { name: "Oliver Bearman", team: "Haas", base_price: 7, current_rating: 3.0 },
-      { name: "Franco Colapinto", team: "Alpine", base_price: 6, current_rating: 2.9 }
+      { name: "Max Verstappen", team: "Red Bull Racing", base_price: 35 },
+      { name: "Lewis Hamilton", team: "Ferrari", base_price: 30 },
+      { name: "Charles Leclerc", team: "Ferrari", base_price: 28 },
+      { name: "Lando Norris", team: "McLaren", base_price: 25 },
+      { name: "Oscar Piastri", team: "McLaren", base_price: 22 },
+      { name: "George Russell", team: "Mercedes", base_price: 24 },
+      { name: "Carlos Sainz", team: "Williams", base_price: 20 },
+      { name: "Fernando Alonso", team: "Aston Martin", base_price: 18 },
+      { name: "Lance Stroll", team: "Aston Martin", base_price: 15 },
+      { name: "Alexander Albon", team: "Williams", base_price: 16 },
+      { name: "Yuki Tsunoda", team: "Red Bull Racing", base_price: 14 },
+      { name: "Nico Hulkenberg", team: "Kick Sauber", base_price: 12 },
+      { name: "Liam Lawson", team: "Racing Bulls", base_price: 13 },
+      { name: "Esteban Ocon", team: "Haas", base_price: 11 },
+      { name: "Pierre Gasly", team: "Alpine", base_price: 10 },
+      { name: "Kimi Antonelli", team: "Mercedes", base_price: 17 },
+      { name: "Gabriel Bortoleto", team: "Kick Sauber", base_price: 9 },
+      { name: "Isack Hadjar", team: "Racing Bulls", base_price: 8 },
+      { name: "Oliver Bearman", team: "Haas", base_price: 7 },
+      { name: "Franco Colapinto", team: "Alpine", base_price: 6 }
     ]
     
     drivers_data.each do |driver_data|
       Driver.find_or_create_by(name: driver_data[:name]) do |driver|
         driver.team = driver_data[:team]
         driver.base_price = driver_data[:base_price]
-        driver.current_rating = driver_data[:current_rating]
         driver.current_price = driver_data[:base_price]
+        # Rating will be calculated by the new system
       end
     end
     
-    # Create constructors with base data (UPDATED BASE PRICES)
+    # Create constructors with base data (ratings will be calculated by the new system)
     constructors_data = [
-      { name: "Red Bull Racing", base_price: 12, current_rating: 4.9 },
-      { name: "Ferrari", base_price: 12, current_rating: 4.7 },
-      { name: "Mercedes", base_price: 11, current_rating: 4.6 },
-      { name: "McLaren", base_price: 12, current_rating: 4.8 },
-      { name: "Williams", base_price: 10, current_rating: 4.0 },
-      { name: "Aston Martin", base_price: 9, current_rating: 3.8 },
-      { name: "Kick Sauber", base_price: 6, current_rating: 3.2 },
-      { name: "Racing Bulls", base_price: 8, current_rating: 3.5 },
-      { name: "Haas", base_price: 5, current_rating: 3.0 },
-      { name: "Alpine", base_price: 7, current_rating: 3.1 }
+      { name: "Red Bull Racing", base_price: 12 },
+      { name: "Ferrari", base_price: 12 },
+      { name: "Mercedes", base_price: 11 },
+      { name: "McLaren", base_price: 12 },
+      { name: "Williams", base_price: 10 },
+      { name: "Aston Martin", base_price: 9 },
+      { name: "Kick Sauber", base_price: 6 },
+      { name: "Racing Bulls", base_price: 8 },
+      { name: "Haas", base_price: 5 },
+      { name: "Alpine", base_price: 7 }
     ]
     
     constructors_data.each do |constructor_data|
       Constructor.find_or_create_by(name: constructor_data[:name]) do |constructor|
         constructor.base_price = constructor_data[:base_price]
-        constructor.current_rating = constructor_data[:current_rating]
         constructor.current_price = constructor_data[:base_price]
+        # Rating will be calculated by the new system
       end
     end
     
     # Populate with some sample race results based on current standings
     populate_sample_race_results
+    
+    # Update all ratings using the new rating system
+    update_all_ratings!
   end
   
   def self.populate_sample_race_results
@@ -270,27 +273,35 @@ class F1DataService
   def self.get_detailed_driver_calculations
     Driver.all.map do |driver|
       recent_performance = DriverResult.average_performance_for_driver(driver.name, 5)
+      season_performance = DriverResult.average_performance_for_driver(driver.name, 20)
       championship_position = driver.championship_position
       championships_won = driver.send(:get_championships_won)
       
       # Calculate rating components
-      performance_rating = [(recent_performance / 5.0), 5.0].min
-      championship_rating = driver.send(:calculate_championship_rating, championship_position)
       championship_history_rating = driver.send(:calculate_championship_history_rating, championships_won)
+      championship_position_rating = driver.send(:calculate_championship_rating, championship_position)
+      recent_performance_rating = [(recent_performance / 5.0), 5.0].min
+      season_performance_rating = [(season_performance / 5.0), 5.0].min
       
-      # Calculate final rating
-      final_rating = (performance_rating * 0.6 + championship_rating * 0.3 + championship_history_rating * 0.1).round(1)
+      # NEW BALANCED SYSTEM: 10% history + 50% position + 30% recent + 10% season
+      final_rating = (
+        championship_history_rating * 0.1 +      # 10% - Championship history
+        championship_position_rating * 0.5 +     # 50% - Current championship position
+        recent_performance_rating * 0.3 +        # 30% - Last 5 races performance
+        season_performance_rating * 0.1          # 10% - Season-long performance
+      ).round(1)
       
-      # Calculate price components
-      performance_multiplier = recent_performance / 10.0
-      rating_multiplier = final_rating / 2.5
-      championship_multiplier = driver.send(:calculate_championship_multiplier, championship_position)
-      championship_history_multiplier = driver.send(:calculate_championship_history_multiplier, championships_won)
+      # Calculate price using the same formula as Driver model
+      # Base price from championship position
+      base_price = driver.send(:calculate_base_price_from_position, championship_position)
       
-      # Calculate final price
-      final_price = (driver.base_price * (1 + performance_multiplier + rating_multiplier + championship_multiplier + championship_history_multiplier)).round
-      final_price = [final_price, 50].min
-      final_price = [final_price, 15].max
+      # Rating multiplier (0.8x to 1.2x based on rating)
+      rating_multiplier = (final_rating / 5.0) * 0.4 + 0.8
+      final_price = (base_price * rating_multiplier).round
+      
+      # Ensure price stays within reasonable bounds for $100M budget
+      final_price = [final_price, 50].min # Max $50M
+      final_price = [final_price, 15].max # Min $15M
       
       {
         name: driver.name,
@@ -299,48 +310,204 @@ class F1DataService
         championship_position: championship_position,
         
         # Rating breakdown
-        performance_rating: performance_rating.round(2),
-        championship_rating: championship_rating.round(2),
         championship_history_rating: championship_history_rating.round(2),
+        championship_position_rating: championship_position_rating.round(2),
+        recent_performance_rating: recent_performance_rating.round(2),
+        season_performance_rating: season_performance_rating.round(2),
         final_rating: final_rating,
         
         # Price breakdown
-        base_price: driver.base_price,
-        performance_multiplier: performance_multiplier.round(2),
+        base_price: base_price,
         rating_multiplier: rating_multiplier.round(2),
-        championship_multiplier: championship_multiplier.round(2),
-        championship_history_multiplier: championship_history_multiplier.round(2),
         final_price: final_price,
         
-        # Recent performance data
-        recent_performance_score: recent_performance.round(2)
+        # Performance data
+        recent_performance_score: recent_performance.round(2),
+        season_performance_score: season_performance.round(2)
       }
     end.sort_by { |d| -d[:final_price] }
   end
 
   def self.update_standings_from_racingnews365
-    # This method would fetch the latest standings from RacingNews365
-    # and update the database with new race results
-    # In a real implementation, this would scrape the website or use their API
-    
-    # For now, we'll create a method that can be called after each race
-    # to manually update the standings based on the latest race results
-    
+    # Fetch the latest standings from RacingNews365
     Rails.logger.info "Updating standings from RacingNews365..."
     
-    # This would be implemented to:
-    # 1. Fetch latest standings from https://racingnews365.com/formula-1-standings-2025
-    # 2. Compare with current database standings
-    # 3. Add new race results if there are differences
-    # 4. Update all ratings and prices
+    begin
+      # Fetch the standings page
+      uri = URI('https://racingnews365.com/formula-1-standings-2025')
+      response = Net::HTTP.get_response(uri)
+      
+      if response.is_a?(Net::HTTPSuccess)
+        doc = Nokogiri::HTML(response.body)
+        
+        # Parse driver standings from the page
+        driver_standings = parse_driver_standings_from_page(doc)
+        constructor_standings = parse_constructor_standings_from_page(doc)
+        
+        if driver_standings.any?
+          # Update driver championship positions based on real data
+          update_driver_championship_positions(driver_standings)
+          
+          # Update constructor championship positions
+          update_constructor_championship_positions(constructor_standings)
+          
+          # Update all ratings based on new standings
+          update_all_ratings!
+          
+          Rails.logger.info "Successfully updated standings from RacingNews365"
+          
+          return {
+            success: true,
+            new_results: true,
+            message: "Standings updated successfully from RacingNews365",
+            drivers_updated: driver_standings.length,
+            constructors_updated: constructor_standings.length,
+            last_updated: Time.current
+          }
+        else
+          Rails.logger.warn "No driver standings found on RacingNews365"
+          return {
+            success: false,
+            new_results: false,
+            message: "No standings data found on RacingNews365",
+            error: "No driver standings parsed"
+          }
+        end
+      else
+        Rails.logger.error "Failed to fetch RacingNews365 standings page"
+        return {
+          success: false,
+          new_results: false,
+          message: "Failed to fetch RacingNews365 standings",
+          error: "HTTP #{response.code}"
+        }
+      end
+    rescue => e
+      Rails.logger.error "Error updating standings from RacingNews365: #{e.message}"
+      return {
+        success: false,
+        new_results: false,
+        message: "Error updating standings from RacingNews365",
+        error: e.message
+      }
+    end
+  end
+
+  def self.parse_driver_standings_from_page(doc)
+    # Parse driver standings from RacingNews365 standings page
+    driver_standings = []
     
-    # For now, return a placeholder response
-    {
-      success: true,
-      message: "Standings update method ready for implementation",
-      next_race: "Dutch Grand Prix",
-      last_updated: Time.current
-    }
+    # Look for driver standings table
+    doc.css('table tr').each do |row|
+      # Extract driver name, team, and points from the standings table
+      driver_name = row.css('td:nth-child(2) a').text.strip
+      team_name = row.css('td:nth-child(2)').text.strip.match(/\[(.*?)\]/)&.[](1)&.strip
+      points_text = row.css('td:nth-child(3)').text.strip
+      position_text = row.css('td:nth-child(1)').text.strip
+      
+      if driver_name.present? && points_text.present? && position_text.present?
+        position = position_text.to_i
+        points = points_text.to_i
+        
+        # Map team names to match our database
+        team_mapping = {
+          "Red Bull" => "Red Bull Racing",
+          "McLaren" => "McLaren",
+          "Ferrari" => "Ferrari", 
+          "Mercedes" => "Mercedes",
+          "Williams" => "Williams",
+          "Aston Martin" => "Aston Martin",
+          "Stake F1 Team" => "Kick Sauber",
+          "Haas" => "Haas",
+          "Racing Bulls" => "Racing Bulls",
+          "Alpine" => "Alpine"
+        }
+        
+        mapped_team = team_mapping[team_name] || team_name
+        
+        driver_standings << {
+          name: driver_name,
+          team: mapped_team,
+          position: position,
+          points: points
+        }
+      end
+    end
+    
+    driver_standings
+  end
+
+  def self.parse_constructor_standings_from_page(doc)
+    # Parse constructor standings from RacingNews365 standings page
+    constructor_standings = []
+    
+    # Look for constructor standings table
+    doc.css('table tr').each do |row|
+      # Extract constructor name and points
+      constructor_name = row.css('td:nth-child(2) a').text.strip
+      points_text = row.css('td:nth-child(3)').text.strip
+      position_text = row.css('td:nth-child(1)').text.strip
+      
+      if constructor_name.present? && points_text.present? && position_text.present?
+        position = position_text.to_i
+        points = points_text.to_i
+        
+        # Map constructor names to match our database
+        constructor_mapping = {
+          "McLaren" => "McLaren",
+          "Ferrari" => "Ferrari",
+          "Mercedes" => "Mercedes", 
+          "Red Bull" => "Red Bull Racing",
+          "Williams" => "Williams",
+          "Aston Martin" => "Aston Martin",
+          "Stake F1 Team" => "Kick Sauber",
+          "Haas" => "Haas",
+          "Racing Bulls" => "Racing Bulls",
+          "Alpine" => "Alpine"
+        }
+        
+        mapped_constructor = constructor_mapping[constructor_name] || constructor_name
+        
+        constructor_standings << {
+          name: mapped_constructor,
+          position: position,
+          points: points
+        }
+      end
+    end
+    
+    constructor_standings
+  end
+
+  def self.update_driver_championship_positions(driver_standings)
+    # Update driver championship positions based on real standings
+    driver_standings.each do |standing|
+      driver = Driver.find_by(name: standing[:name])
+      if driver
+        # Store the championship position in a way that the rating calculation can use
+        # We'll use a custom attribute or method to store this
+        driver.update_column(:championship_position, standing[:position]) if driver.respond_to?(:championship_position)
+        
+        Rails.logger.info "Updated #{driver.name} championship position to #{standing[:position]}"
+      else
+        Rails.logger.warn "Driver not found in database: #{standing[:name]}"
+      end
+    end
+  end
+
+  def self.update_constructor_championship_positions(constructor_standings)
+    # Update constructor championship positions based on real standings
+    constructor_standings.each do |standing|
+      constructor = Constructor.find_by(name: standing[:name])
+      if constructor
+        # Store the championship position
+        constructor.update_column(:championship_position, standing[:position]) if constructor.respond_to?(:championship_position)
+        
+        Rails.logger.info "Updated #{constructor.name} championship position to #{standing[:position]}"
+      else
+        Rails.logger.warn "Constructor not found in database: #{standing[:name]}"
+      end
+    end
   end
 
   def self.check_for_new_race_results

@@ -9,8 +9,10 @@ class SessionsController < ApplicationController
     if user && user.authenticate(password)
       # Store user id in session
       session[:user_id] = user.id
-      redirect_to dashboard_path, notice: "Welcome back, #{user.full_name}! 🏎️"
+      Rails.logger.info "User #{user.full_name} logged in successfully"
+      redirect_to dashboard_path, notice: "Welcome to Fantasy F1 League! 🏎️"
     else
+      Rails.logger.error "Login failed for #{email_or_username}"
       redirect_to login_path, alert: "Invalid email/username or password"
     end
   end

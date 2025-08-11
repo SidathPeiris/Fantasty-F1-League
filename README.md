@@ -71,6 +71,8 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **📊 Rating Summary** - Detailed breakdown of all driver and constructor ratings
 - **🧮 Driver Calculations** - In-depth analysis of rating and price calculations
 - **🎯 Price Organization** - All pages sorted by cost for strategic team building
+- **🌐 RacingNews365 Integration** - Real-time data fetching from official F1 standings
+- **📅 Weekly Rating Updates** - Automated system for post-race rating adjustments
 
 ### 🎮 **Upcoming Fantasy League Features**
 
@@ -319,3 +321,67 @@ If you have any questions or need help, please open an issue on GitHub or contac
 ---
 
 **🏎️ Ready to start your Fantasy F1 journey? Sign up today and join the race! 🏁**
+
+## 🏎️ Weekly Rating Update Process
+
+The Fantasy F1 League uses real championship standings from [RacingNews365](https://racingnews365.com/formula-1-standings-2025) to calculate driver and constructor ratings. This ensures ratings are always current and based on actual performance.
+
+### **How It Works:**
+
+1. **📊 Real-Time Data Source**: The system fetches current championship standings from RacingNews365
+2. **🔄 Weekly Updates**: Ratings are updated after each race weekend (typically Monday)
+3. **📈 Dynamic Calculations**: Ratings consider championship position, recent performance, and historical achievements
+4. **💰 Price Adjustments**: Costs automatically adjust based on current ratings and performance
+
+### **Current 2025 Championship Standings (as of August 2025):**
+
+#### **🏁 Top Drivers:**
+- **Oscar Piastri** (McLaren) - 284 points
+- **Lando Norris** (McLaren) - 275 points  
+- **Max Verstappen** (Red Bull) - 187 points
+- **George Russell** (Mercedes) - 172 points
+- **Charles Leclerc** (Ferrari) - 151 points
+
+#### **🏭 Top Constructors:**
+- **McLaren** - 559 points
+- **Ferrari** - 260 points
+- **Mercedes** - 236 points
+- **Red Bull** - 194 points
+- **Williams** - 70 points
+
+### **Running Weekly Updates:**
+
+```bash
+# Manual weekly update (run after each race)
+ruby weekly_rating_update.rb
+
+# Or use the admin panel
+# 1. Visit /admin (SidathPeiris only)
+# 2. Click "Check for New Race Results"
+# 3. Click "Update Standings Manually"
+```
+
+### **Rating Calculation Formula:**
+
+**Driver Ratings** = (Performance × 60%) + (Championship Position × 30%) + (Championship History × 10%)
+
+**Constructor Ratings** = (Performance × 70%) + (Championship Position × 30%)
+
+### **Price Calculation:**
+- **Driver Pricing**: Based on championship position with rating multiplier
+  - **Premium Tier**: $50M (P1-P2 in championship)
+  - **Elite Tier**: $40-44M (P3-P4 in championship)
+  - **Mid Tier**: $35-36M (P5-P6 in championship)
+  - **Value Tier**: $22-29M (P7-P10 in championship)
+  - **Budget Tier**: $15-18M (P11-P20 in championship)
+
+- **Constructor Pricing**: Based on championship position with rating multiplier
+  - **Premium Tier**: $25M (P1 in championship)
+  - **Elite Tier**: $22M (P2-P3 in championship)
+  - **Mid Tier**: $15-16M (P4-P5 in championship)
+  - **Budget Tier**: $7-12M (P6-P10 in championship)
+
+- **Budget Management**: Strict $100M total budget for 2 drivers + 1 constructor
+- **Rating Multiplier**: 0.8x to 1.2x based on performance rating
+
+## 🎮 Development Workflow
