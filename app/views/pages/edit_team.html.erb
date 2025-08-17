@@ -1,0 +1,26 @@
+<%= render 'shared/navigation' %>
+
+<meta name="csrf-token" content="<%= form_authenticity_token %>">
+
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black text-white">
+  <div class="container mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-f1-red-600 mb-2">Edit My Team</h1>
+      <p class="text-gray-400 text-lg">Mid-season break transfer window - sell and replace your team members</p>
+    </div>
+
+    <% if @has_team && !can_edit_team? %>
+      <div class="bg-red-900 border border-red-600 text-white px-6 py-4 rounded-lg text-center mb-8">
+        <h2 class="text-xl font-bold mb-2">Team Editing is Currently Locked</h2>
+        <p class="text-red-200">
+          <%= team_edit_status[:message] %>
+          <% if team_edit_status[:next_unlock] == "mid_season_break" %>
+            <br>Unlocks during mid-season break
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+
+    <div data-react-component="TeamEditor" data-current-team="<%= @current_team_data.to_json %>"></div>
+  </div>
+</div>

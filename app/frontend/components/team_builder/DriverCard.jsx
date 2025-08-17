@@ -1,6 +1,6 @@
 import React from 'react'
 
-const DriverCard = ({ driver, isSelected, onSelect, disabled }) => {
+const DriverCard = ({ driver, isSelected, onSelect, disabled, isCurrent, isSold }) => {
   // Debug logging
   console.log('DriverCard render for', driver.name, 'photo_url:', driver.photo_url)
   const getRatingColor = (rating) => {
@@ -32,10 +32,16 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled }) => {
         relative border-2 rounded-lg p-3 cursor-pointer transition-all duration-200
         ${isSelected ? 'shadow-lg scale-105' : 'hover:border-gray-400 hover:shadow-md'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        ${isCurrent ? 'border-green-500' : ''}
+        ${isSold ? 'border-red-600 bg-red-50' : ''}
       `}
       style={{
-        borderColor: isSelected ? getTeamColor(driver.team).border : '#D1D5DB',
-        backgroundColor: isSelected ? `${getTeamColor(driver.team).background}20` : '#F3F4F6'
+        borderColor: isSelected ? getTeamColor(driver.team).border : 
+                     isCurrent ? '#10B981' : 
+                     isSold ? '#DC2626' : '#D1D5DB',
+        backgroundColor: isSelected ? `${getTeamColor(driver.team).background}20` : 
+                          isCurrent ? '#F0FDF4' : 
+                          isSold ? '#FEF2F2' : '#F3F4F6'
       }}
       onClick={() => !disabled && onSelect()}
     >
@@ -45,9 +51,23 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled }) => {
           ✓
         </div>
       )}
+      
+      {/* Current Team Indicator */}
+      {isCurrent && !isSelected && (
+        <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+          🏎️
+        </div>
+      )}
+      
+      {/* Sold Indicator */}
+      {isSold && (
+        <div className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+          💰
+        </div>
+      )}
 
       {/* Driver Photo */}
-      <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center overflow-hidden">
+      <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center overflow-hidden border-2 border-red-500">
         {driver.photo_url ? (
           <img 
             src={driver.photo_url} 
@@ -72,7 +92,9 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled }) => {
       {/* Driver Info */}
       <div className="text-center">
         <h3 className="font-bold text-gray-800 text-xs mb-1">{driver.name}</h3>
-        <p className="text-xs text-gray-600 mb-1">{driver.team}</p>
+        <p className="text-xs mb-1" style={{ color: getTeamColor(driver.team).border }}>
+          {driver.team}
+        </p>
         
         {/* Rating */}
         <div className="flex items-center justify-center mb-1">
@@ -82,7 +104,7 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled }) => {
         </div>
 
         {/* Price */}
-        <div className="text-xs font-bold text-gray-800">
+        <div className="text-xs font-bold text-green-600">
           ${driver.current_price}M
         </div>
       </div>

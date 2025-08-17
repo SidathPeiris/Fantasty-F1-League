@@ -1,27 +1,27 @@
-<!-- Admin Panel -->
+<!-- Admin Panel Page -->
 <div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
-  <%= render 'shared/header' %>
+  <!-- CSRF Token for JavaScript functions -->
+  <meta name="csrf-token" content="<%= form_authenticity_token %>">
 
-  <!-- Main Content -->
-  <div class="container mx-auto px-4 py-12">
-    <!-- Header Section -->
-    <div class="text-center mb-12">
-      <div class="flex items-center justify-between max-w-7xl mx-auto mb-4">
-        <a href="/dashboard" class="text-2xl font-bold text-white bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
-          Fantasy F1 League
-        </a>
-        <h1 class="text-5xl font-bold text-white flex-1 text-center">⚙️ Admin Panel</h1>
-        <div class="w-64"></div>
-      </div>
-      <p class="text-xl text-gray-300">Manage F1 data, ratings, and race results</p>
-      <p class="text-sm text-gray-400 mt-2">Last updated: <%= Time.current.in_time_zone('Australia/Sydney').strftime("%B %d, %Y at %I:%M %p AEST") %></p>
+  <!-- Navigation Header -->
+  <%= render 'shared/navigation' %>
+
+  <!-- Page Title -->
+  <div class="bg-gradient-to-br from-gray-900 to-gray-800 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-white text-center mb-2">Admin Panel</h1>
+      <p class="text-xl text-gray-300 text-center mb-2">Manage F1 data and application settings</p>
+      <p class="text-sm text-gray-400 text-center">Last updated: <%= Time.current.in_time_zone('Australia/Sydney').strftime("%B %d, %Y at %I:%M %p AEST") %></p>
       <% if @ratings_updated %>
-        <div class="mt-4 p-4 bg-green-800 border border-green-600 rounded-lg">
+        <div class="mt-4 p-4 bg-green-800 border border-green-600 rounded-lg max-w-2xl mx-auto">
           <p class="text-green-200 text-center">✅ Ratings and costs updated after race results!</p>
         </div>
       <% end %>
     </div>
+  </div>
 
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-12">
     <!-- Admin Controls -->
     <div class="max-w-4xl mx-auto mb-12">
       <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700">
@@ -73,6 +73,145 @@
             <%= form.submit "Update Standings Manually", class: "w-full bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold py-3 px-6 rounded-lg hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl" %>
           <% end %>
         </div>
+
+        <!-- Mid-Season Break Management -->
+        <div class="mt-8 bg-gradient-to-br from-indigo-800 to-indigo-900 p-6 rounded-xl border border-indigo-600">
+          <h3 class="text-xl font-bold text-white mb-4">🔓 Mid-Season Break Management</h3>
+          <p class="text-gray-300 text-sm mb-4">Set the dates for the mid-season break when users can modify their teams. During this period, users will be able to sell drivers/constructors and rebuild their teams.</p>
+          
+          <!-- Current Break Period Display -->
+          <div id="current_break_display" class="mb-6 p-4 bg-indigo-700 border border-indigo-500 rounded-lg hidden">
+            <h4 class="text-lg font-bold text-white mb-2">📅 Current Break Period</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-indigo-600 p-3 rounded-lg">
+                <span class="text-indigo-200 text-sm font-semibold">Start Date:</span>
+                <span id="current_start_date" class="text-white font-bold ml-2"></span>
+              </div>
+              <div class="bg-indigo-600 p-3 rounded-lg">
+                <span class="text-indigo-200 text-sm font-semibold">End Date:</span>
+                <span id="current_end_date" class="text-white font-bold ml-2"></span>
+              </div>
+            </div>
+            <div class="mt-3 p-2 bg-green-600 rounded-lg">
+              <span class="text-green-200 text-sm">✅ Break period is active - Users can modify teams</span>
+            </div>
+          </div>
+          
+          <!-- No Break Period Display -->
+          <div id="no_break_display" class="mb-6 p-4 bg-gray-700 border border-gray-500 rounded-lg">
+            <h4 class="text-lg font-bold text-white mb-2">🔒 No Break Period Set</h4>
+            <p class="text-gray-300 text-sm">Teams are currently locked. Set a break period to allow users to modify their teams.</p>
+          </div>
+          
+          <!-- Breaks Set Display -->
+          <div id="breaks_set_display" class="mb-6 p-4 bg-green-700 border border-green-500 rounded-lg hidden">
+            <h4 class="text-lg font-bold text-white mb-2">✅ Breaks Set</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <div class="bg-green-600 p-3 rounded-lg">
+                <span class="text-green-200 text-sm font-semibold">Start Date:</span>
+                <span id="breaks_set_start_date" class="text-white font-bold ml-2"></span>
+              </div>
+              <div class="bg-green-600 p-3 rounded-lg">
+                <span class="text-green-200 text-sm font-semibold">End Date:</span>
+                <span id="breaks_set_end_date" class="text-white font-bold ml-2"></span>
+              </div>
+            </div>
+            <p class="text-green-200 text-sm">Break period is set and ready. Users will be able to modify teams during this period.</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-white text-sm font-bold mb-2">Break Start Date</label>
+              <input type="date" id="break_start_date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-indigo-400">
+            </div>
+            <div>
+              <label class="block text-white text-sm font-bold mb-2">Break End Date</label>
+              <input type="date" id="break_end_date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-indigo-400">
+            </div>
+          </div>
+          
+          <div class="flex gap-4">
+            <button onclick="setMidSeasonBreak()" class="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold py-3 px-6 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              Set Break Period
+            </button>
+            <button onclick="clearMidSeasonBreak()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              Clear Break Period
+            </button>
+          </div>
+          
+          <div id="break_status" class="mt-4 p-3 bg-gray-700 border border-gray-600 rounded-lg hidden">
+            <p class="text-gray-300 text-sm" id="break_status_text"></p>
+          </div>
+        </div>
+
+        <!-- Season Reset Management -->
+        <div class="mt-8 bg-gradient-to-br from-purple-800 to-purple-900 p-6 rounded-xl border border-purple-600">
+          <h3 class="text-xl font-bold text-white mb-4">🔄 Annual Season Reset Management</h3>
+          <p class="text-gray-300 text-sm mb-4">Manage the annual team reset that happens on January 1st each year. All user teams are automatically deleted and users must create new teams for the new season.</p>
+          
+          <!-- Current Season Status -->
+          <div class="mb-6 p-4 bg-purple-700 border border-purple-500 rounded-lg">
+            <h4 class="text-lg font-bold text-white mb-2">📊 Current Season Status</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-purple-600 p-3 rounded-lg">
+                <span class="text-purple-200 text-sm font-semibold">Current Year:</span>
+                <span id="current_season_year" class="text-white font-bold ml-2"></span>
+              </div>
+              <div class="bg-purple-600 p-3 rounded-lg">
+                <span class="text-purple-200 text-sm font-semibold">Last Reset:</span>
+                <span id="last_reset_info" class="text-white font-bold ml-2"></span>
+              </div>
+              <div class="bg-purple-600 p-3 rounded-lg">
+                <span class="text-purple-200 text-sm font-semibold">Current Teams:</span>
+                <span id="current_teams_count" class="text-white font-bold ml-2"></span>
+              </div>
+              <div class="bg-purple-600 p-3 rounded-lg">
+                <span class="text-purple-200 text-sm font-semibold">First Race:</span>
+                <span id="first_race_status" class="text-white font-bold ml-2"></span>
+              </div>
+            </div>
+            <div id="reset_needed_indicator" class="mt-3 p-2 rounded-lg hidden">
+              <span id="reset_needed_text" class="text-sm font-semibold"></span>
+            </div>
+          </div>
+          
+          <!-- First Race Date Management -->
+          <div class="mb-6 p-4 bg-purple-700 border border-purple-500 rounded-lg">
+            <h4 class="text-lg font-bold text-white mb-2">🏁 First Race Date Management</h4>
+            <p class="text-gray-300 text-sm mb-4">Set the date of the first race. <strong>New users and users without teams can always create teams.</strong> For users with existing teams: they can edit freely between January 1st and the first race. After the first race, teams are locked until the mid-season break.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label class="block text-white text-sm font-bold mb-2">First Race Date</label>
+                <input type="date" id="first_race_date" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-400">
+              </div>
+              <div class="flex items-end">
+                <button onclick="setFirstRaceDate()" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                  Set First Race Date
+                </button>
+              </div>
+            </div>
+            
+            <!-- Current First Race Display -->
+            <div id="current_first_race_display" class="mt-4 p-3 bg-purple-600 rounded-lg hidden">
+              <span class="text-purple-200 text-sm font-semibold">Current First Race:</span>
+              <span id="current_first_race_date" class="text-white font-bold ml-2"></span>
+            </div>
+          </div>
+          
+          <div class="flex gap-4">
+            <button onclick="checkSeasonReset()" class="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              Check Reset Status
+            </button>
+            <button onclick="forceSeasonReset()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+              Force Season Reset
+            </button>
+          </div>
+          
+          <div id="season_reset_status" class="mt-4 p-3 bg-gray-700 border border-gray-600 rounded-lg hidden">
+            <p class="text-gray-300 text-sm" id="season_reset_status_text"></p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -101,4 +240,351 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+
+<script>
+// Mid-Season Break Management Functions
+function setMidSeasonBreak() {
+  const startDate = document.getElementById('break_start_date').value;
+  const endDate = document.getElementById('break_end_date').value;
+  
+  if (!startDate || !endDate) {
+    showBreakStatus('Please select both start and end dates.', 'error');
+    return;
+  }
+  
+  if (new Date(startDate) >= new Date(endDate)) {
+    showBreakStatus('Start date must be before end date.', 'error');
+    return;
+  }
+  
+  // Send to backend to save dates
+  fetch('/admin/set-mid-season-break', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    },
+    body: JSON.stringify({
+      start_date: startDate,
+      end_date: endDate
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showBreakStatus(`Mid-season break set from ${startDate} to ${endDate}. Users will be able to modify teams during this period.`, 'success');
+      document.getElementById('break_start_date').value = ''; // Clear input fields after setting
+      document.getElementById('break_end_date').value = '';
+      updateBreakPeriodDisplay(); // Update display to show current period
+    } else {
+      showBreakStatus(`Error: ${data.message}`, 'error');
+    }
+  })
+  .catch(error => {
+    showBreakStatus(`Error: ${error.message}`, 'error');
+  });
+}
+
+function clearMidSeasonBreak() {
+  if (!confirm('Are you sure you want to clear the mid-season break period? Users will not be able to modify teams.')) {
+    return;
+  }
+  
+  fetch('/admin/clear-mid-season-break', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showBreakStatus('Mid-season break period cleared. Teams are now locked.', 'success');
+      document.getElementById('break_start_date').value = '';
+      document.getElementById('break_end_date').value = '';
+      updateBreakPeriodDisplay(); // Update display to show no break period
+      document.getElementById('breaks_set_display').classList.add('hidden'); // Hide breaks set display
+      document.getElementById('no_break_display').classList.remove('hidden'); // Show no break display
+    } else {
+      showBreakStatus(`Error: ${data.message}`, 'error');
+    }
+  })
+  .catch(error => {
+    showBreakStatus(`Error: ${error.message}`, 'error');
+  });
+}
+
+function showBreakStatus(message, type) {
+  const statusDiv = document.getElementById('break_status');
+  const statusText = document.getElementById('break_status_text');
+  
+  statusText.textContent = message;
+  statusDiv.className = `mt-4 p-3 border rounded-lg ${type === 'success' ? 'bg-green-800 border-green-600' : 'bg-red-800 border-red-600'}`;
+  statusDiv.classList.remove('hidden');
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    statusDiv.classList.add('hidden');
+  }, 5000);
+}
+
+function updateBreakPeriodDisplay() {
+  fetch('/admin/get-mid-season-break')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.break_period) {
+        // Format dates for display
+        const startDate = new Date(data.break_period.start_date);
+        const endDate = new Date(data.break_period.end_date);
+        const currentDate = new Date();
+        
+        // Check if break period is currently active
+        if (currentDate >= startDate && currentDate <= endDate) {
+          // Break period is currently active - show current break display
+          document.getElementById('current_start_date').textContent = startDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          document.getElementById('current_end_date').textContent = endDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          document.getElementById('current_break_display').classList.remove('hidden');
+          document.getElementById('no_break_display').classList.add('hidden');
+          document.getElementById('breaks_set_display').classList.add('hidden');
+        } else {
+          // Break period is set but not currently active - show breaks set display
+          document.getElementById('breaks_set_start_date').textContent = startDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          document.getElementById('breaks_set_end_date').textContent = endDate.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          document.getElementById('breaks_set_display').classList.remove('hidden');
+          document.getElementById('current_break_display').classList.add('hidden');
+          document.getElementById('no_break_display').classList.add('hidden');
+        }
+      } else {
+        // No break period set
+        document.getElementById('current_break_display').classList.add('hidden');
+        document.getElementById('no_break_display').classList.remove('hidden');
+        document.getElementById('breaks_set_display').classList.add('hidden');
+      }
+    })
+    .catch(error => {
+      console.log('Error loading current break period:', error);
+      document.getElementById('current_break_display').classList.add('hidden');
+      document.getElementById('no_break_display').classList.remove('hidden');
+      document.getElementById('breaks_set_display').classList.add('hidden');
+    });
+}
+
+// Load current break dates on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateBreakPeriodDisplay(); // Call this on page load to set the initial display
+  updateSeasonResetStatus(); // Also update season reset status
+  updateFirstRaceDateDisplay(); // Also update first race date display
+});
+
+// Season Reset Management Functions
+function updateSeasonResetStatus() {
+  fetch('/admin/get-season-reset-status')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('current_season_year').textContent = data.current_year;
+        document.getElementById('last_reset_info').textContent = data.last_reset_info;
+        document.getElementById('current_teams_count').textContent = data.current_teams_count;
+        document.getElementById('first_race_status').textContent = data.first_race_date ? new Date(data.first_race_date).toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        }) : 'Not set';
+        
+        // Show reset needed indicator if applicable
+        const resetIndicator = document.getElementById('reset_needed_indicator');
+        const resetText = document.getElementById('reset_needed_text');
+        
+        if (data.reset_needed) {
+          resetIndicator.classList.remove('hidden');
+          resetIndicator.className = 'mt-3 p-2 bg-red-600 rounded-lg';
+          resetText.textContent = '⚠️ Season reset needed for new year!';
+        } else {
+          resetIndicator.classList.remove('hidden');
+          resetIndicator.className = 'mt-3 p-2 bg-green-600 rounded-lg';
+          resetText.textContent = '✅ Season reset not needed';
+        }
+      }
+    })
+    .catch(error => {
+      console.log('Error loading season reset status:', error);
+    });
+}
+
+function checkSeasonReset() {
+  fetch('/admin/check-season-reset', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showSeasonResetStatus(data.message, 'success');
+      updateSeasonResetStatus(); // Refresh the display
+    } else {
+      showSeasonResetStatus(`Error: ${data.message}`, 'error');
+    }
+  })
+  .catch(error => {
+    showSeasonResetStatus(`Error: ${error.message}`, 'error');
+  });
+}
+
+function forceSeasonReset() {
+  if (!confirm('⚠️ WARNING: This will force delete ALL user teams for the current year. This action cannot be undone. Are you sure you want to continue?')) {
+    return;
+  }
+  
+  fetch('/admin/force-season-reset', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showSeasonResetStatus(data.message, 'success');
+      updateSeasonResetStatus(); // Refresh the display
+    } else {
+      showSeasonResetStatus(`Error: ${data.message}`, 'error');
+    }
+  })
+  .catch(error => {
+    showSeasonResetStatus(`Error: ${error.message}`, 'error');
+  });
+}
+
+function showSeasonResetStatus(message, type) {
+  const statusDiv = document.getElementById('season_reset_status');
+  const statusText = document.getElementById('season_reset_status_text');
+  
+  statusText.textContent = message;
+  statusDiv.className = `mt-4 p-3 border rounded-lg ${type === 'success' ? 'bg-green-800 border-green-600' : 'bg-red-800 border-red-600'}`;
+  statusDiv.classList.remove('hidden');
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    statusDiv.classList.add('hidden');
+  }, 5000);
+}
+
+function setFirstRaceDate() {
+  const firstRaceDate = document.getElementById('first_race_date').value;
+  
+  console.log('First Race Date Input Value:', firstRaceDate);
+  console.log('Type of value:', typeof firstRaceDate);
+  
+  if (!firstRaceDate) {
+    showSeasonResetStatus('Please select a first race date.', 'error');
+    return;
+  }
+
+  // Validate date format
+  const parsedDate = new Date(firstRaceDate);
+  console.log('Parsed Date:', parsedDate);
+  console.log('Is Valid Date:', !isNaN(parsedDate.getTime()));
+  
+  if (isNaN(parsedDate.getTime())) {
+    showSeasonResetStatus('Invalid date format. Please select a valid date.', 'error');
+    return;
+  }
+
+  if (parsedDate < new Date('2023-01-01')) { // Example: January 1st, 2023
+    showSeasonResetStatus('First race date must be on or after January 1st, 2023.', 'error');
+    return;
+  }
+
+  const requestBody = {
+    first_race_date: firstRaceDate
+  };
+  
+  console.log('Request Body:', requestBody);
+  console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'));
+
+  fetch('/admin/set-first-race-date', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    },
+    body: JSON.stringify(requestBody)
+  })
+  .then(response => {
+    console.log('Response Status:', response.status);
+    console.log('Response Headers:', response.headers);
+    return response.json();
+  })
+  .then(data => {
+    console.log('Response Data:', data);
+    if (data.success) {
+      showSeasonResetStatus(`First race date set to ${firstRaceDate}. Users can edit teams freely until this date.`, 'success');
+      document.getElementById('first_race_date').value = ''; // Clear input field after setting
+      updateFirstRaceDateDisplay(); // Update display to show current first race date
+    } else {
+      showSeasonResetStatus(`Error: ${data.message}`, 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Fetch Error:', error);
+    showSeasonResetStatus(`Error: ${error.message}`, 'error');
+  });
+}
+
+function updateFirstRaceDateDisplay() {
+  fetch('/admin/get-first-race-date')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.first_race_date) {
+        const firstRaceDate = new Date(data.first_race_date);
+        document.getElementById('current_first_race_date').textContent = firstRaceDate.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        document.getElementById('current_first_race_display').classList.remove('hidden');
+      } else {
+        document.getElementById('current_first_race_display').classList.add('hidden');
+      }
+    })
+    .catch(error => {
+      console.log('Error loading first race date:', error);
+      document.getElementById('current_first_race_display').classList.add('hidden');
+    });
+}
+
+// Load current first race date on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateFirstRaceDateDisplay(); // Call this on page load to set the initial display
+});
+</script> 

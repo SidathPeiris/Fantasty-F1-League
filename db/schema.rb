@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_000002) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_15_081013) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -84,6 +84,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_000002) do
     t.integer "championship_position"
   end
 
+  create_table "first_race_dates", force: :cascade do |t|
+    t.date "race_date"
+    t.integer "season_year"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "mid_season_breaks", force: :cascade do |t|
+    t.date "start_date"
+    t.date "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "races", force: :cascade do |t|
     t.string "name"
     t.date "date"
@@ -91,6 +105,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_000002) do
     t.string "country"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "season_reset_logs", force: :cascade do |t|
+    t.integer "year"
+    t.integer "teams_deleted"
+    t.date "reset_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "season_reset_messages", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "season_year"
+    t.boolean "message_shown"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_season_reset_messages_on_user_id"
   end
 
   create_table "team_selections", force: :cascade do |t|
@@ -131,6 +162,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_000002) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "constructor_results", "races"
   add_foreign_key "driver_results", "races"
+  add_foreign_key "season_reset_messages", "users"
   add_foreign_key "team_selections", "teams"
   add_foreign_key "teams", "users"
 end

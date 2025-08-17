@@ -2,8 +2,9 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import Hello from '../components/Hello.jsx'
 import TeamBuilder from '../components/team_builder/TeamBuilder.jsx'
+import TeamEditor from '../components/team_editor/TeamEditor.jsx'
 
-const components = { Hello, TeamBuilder }
+const components = { Hello, TeamBuilder, TeamEditor }
 
 function mountAll() {
   document.querySelectorAll('[data-react-component]').forEach((el) => {

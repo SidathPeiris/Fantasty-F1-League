@@ -1,15 +1,20 @@
 import React from 'react'
 
-const BudgetTracker = ({ totalCost, budgetLimit, isExceeded }) => {
-  const percentage = (totalCost / budgetLimit) * 100
+const BudgetTracker = ({ totalCost, budgetLimit, isExceeded, remainingBudget, soldMoney, totalBudget }) => {
+  // Handle both old and new prop formats for backward compatibility
+  const actualBudgetLimit = totalBudget || budgetLimit
+  const actualRemainingBudget = remainingBudget !== undefined ? remainingBudget : (actualBudgetLimit - totalCost)
+  const actualIsExceeded = isExceeded !== undefined ? isExceeded : (totalCost > actualBudgetLimit)
+  
+  const percentage = (totalCost / actualBudgetLimit) * 100
   const getProgressColor = () => {
-    if (isExceeded) return 'bg-red-500'
+    if (actualIsExceeded) return 'bg-red-500'
     if (percentage >= 80) return 'bg-yellow-500'
     return 'bg-green-500'
   }
 
   const getTextColor = () => {
-    if (isExceeded) return 'text-red-600'
+    if (actualIsExceeded) return 'text-red-600'
     if (percentage >= 80) return 'text-yellow-600'
     return 'text-green-600'
   }
@@ -29,9 +34,25 @@ const BudgetTracker = ({ totalCost, budgetLimit, isExceeded }) => {
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">Budget Limit:</span>
           <span className="font-bold text-lg text-gray-800">
-            ${budgetLimit}M
+            ${actualBudgetLimit}M
           </span>
         </div>
+        {soldMoney > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Original Budget:</span>
+            <span className="font-bold text-lg text-gray-800">
+              $100M
+            </span>
+          </div>
+        )}
+        {soldMoney > 0 && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Money from Sales:</span>
+            <span className="font-bold text-lg text-green-600">
+              +${soldMoney}M
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Progress Bar */}
@@ -53,12 +74,12 @@ const BudgetTracker = ({ totalCost, budgetLimit, isExceeded }) => {
       <div className="text-center">
         <span className="text-sm text-gray-600">Remaining:</span>
         <div className={`text-xl font-bold ${getTextColor()}`}>
-          ${Math.max(0, budgetLimit - totalCost)}M
+          ${Math.max(0, actualRemainingBudget)}M
         </div>
       </div>
 
       {/* Warning Messages */}
-      {isExceeded && (
+      {actualIsExceeded && (
         <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
           <div className="text-red-800 text-sm font-medium">
             ⚠️ Budget exceeded! Please adjust your selections.
@@ -66,7 +87,7 @@ const BudgetTracker = ({ totalCost, budgetLimit, isExceeded }) => {
         </div>
       )}
       
-      {percentage >= 80 && !isExceeded && (
+      {percentage >= 80 && !actualIsExceeded && (
         <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
           <div className="text-yellow-800 text-sm font-medium">
             ⚠️ Budget nearly full! Consider your remaining options.

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
+const ConstructorCard = ({ constructor, isSelected, onSelect, disabled, isCurrent, isSold }) => {
   const getRatingColor = (rating) => {
     if (rating >= 4.8) return '#eab308' // Gold for highest rated (4.8+)
     if (rating > 4.0) return '#15803d' // British racing green for above 4
@@ -29,10 +29,18 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
       className={`
         relative border-2 rounded-lg p-2 transition-all duration-200
         ${isSelected ? 'shadow-lg scale-105 cursor-pointer' : disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400 hover:shadow-md'}
+        ${isCurrent ? 'border-green-500' : ''}
+        ${isSold ? 'border-red-600 bg-red-50' : ''}
       `}
       style={{
-        borderColor: isSelected ? getConstructorColor(constructor.name).border : disabled ? '#9CA3AF' : '#D1D5DB',
-        backgroundColor: isSelected ? `${getConstructorColor(constructor.name).background}20` : disabled ? '#F3F4F6' : '#F3F4F6'
+        borderColor: isSelected ? getConstructorColor(constructor.name).border : 
+                     isCurrent ? '#10B981' : 
+                     isSold ? '#DC2626' : 
+                     disabled ? '#9CA3AF' : '#D1D5DB',
+        backgroundColor: isSelected ? `${getConstructorColor(constructor.name).background}20` : 
+                          isCurrent ? '#F0FDF4' : 
+                          isSold ? '#FEF2F2' : 
+                          disabled ? '#F3F4F6' : '#F3F4F6'
       }}
       onClick={() => !disabled && onSelect()}
       title={disabled ? `${constructor.name} would exceed budget` : isSelected ? `Click to deselect ${constructor.name}` : `Click to select ${constructor.name}`}
@@ -44,8 +52,22 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
         </div>
       )}
       
+      {/* Current Team Indicator */}
+      {isCurrent && !isSelected && (
+        <div className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+          🏎️
+        </div>
+      )}
+      
+      {/* Sold Indicator */}
+      {isSold && (
+        <div className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+          💰
+        </div>
+      )}
+      
       {/* Budget Exceeded Indicator */}
-      {disabled && !isSelected && (
+      {disabled && !isSelected && !isCurrent && !isSold && (
         <div className="absolute -top-1 -right-1 bg-gray-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
           $
         </div>
@@ -54,12 +76,12 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
 
 
       {/* Constructor Car Image */}
-      <div className="w-16 h-16 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center overflow-hidden">
+      <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center overflow-hidden border-2 border-red-500">
         {constructor.logo_url ? (
           <img 
             src={constructor.logo_url} 
             alt={constructor.name}
-            className="w-full h-full rounded-lg object-contain"
+            className="w-full h-full rounded-full object-contain"
             onError={(e) => {
               e.target.style.display = 'none'
               e.target.nextSibling.style.display = 'flex'
@@ -76,7 +98,9 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
 
       {/* Constructor Info */}
       <div className="text-center">
-        <h3 className="font-bold text-gray-800 text-xs mb-1">{constructor.name}</h3>
+        <h3 className="font-bold text-xs mb-1" style={{ color: getConstructorColor(constructor.name).border }}>
+          {constructor.name}
+        </h3>
         
         {/* Rating and Price in same line */}
         <div className="flex items-center justify-center space-x-2 text-xs">
@@ -86,7 +110,7 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled }) => {
           >
             ★ {constructor.current_rating}
           </span>
-          <span className="font-bold text-gray-800">
+          <span className="font-bold text-green-600">
             ${constructor.current_price}M
           </span>
         </div>

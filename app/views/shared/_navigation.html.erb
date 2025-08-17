@@ -1,0 +1,26 @@
+<!-- Navigation Header -->
+<div class="bg-gradient-to-r from-red-800 to-red-900 border-b border-red-600 shadow-lg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center py-4">
+      <!-- Fantasy F1 League Button -->
+      <div class="flex items-center">
+        <a href="/dashboard" class="bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-2 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+          🏎️ Fantasy F1 League
+        </a>
+      </div>
+      
+      <!-- Welcome Message and Logout -->
+      <div class="flex items-center space-x-4">
+        <span class="text-white text-sm">
+          Welcome, <%= current_user.username %>!
+        </span>
+        <% if current_user.username == "SidathPeiris" %>
+          <a href="/admin" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300">
+            🛠️ Admin
+          </a>
+        <% end %>
+        <%= link_to "Logout", logout_path, method: :delete, class: "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300" %>
+      </div>
+    </div>
+  </div>
+</div>

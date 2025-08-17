@@ -1,0 +1,2 @@
+class SeasonResetLog < ApplicationRecord
+end
