@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import DriverCard from '../team_builder/DriverCard'
 import ConstructorCard from '../team_builder/ConstructorCard'
-import BudgetTracker from '../team_builder/BudgetTracker'
+
 
 const MAX_DRIVERS = 2
 const BUDGET_LIMIT = 100
@@ -56,10 +56,14 @@ export default function TeamEditor() {
       if (currentTeamElement) {
         const currentTeamData = JSON.parse(currentTeamElement.getAttribute('data-current-team'))
         console.log('Current team data:', currentTeamData)
+        console.log('Current team data.current_balance:', currentTeamData.current_balance)
+        console.log('typeof current_balance:', typeof currentTeamData.current_balance)
         
         setCurrentDrivers(currentTeamData.drivers || [])
         setCurrentConstructor(currentTeamData.constructor || null)
         setCurrentBalance(currentTeamData.current_balance || 0)
+        
+        console.log('Setting currentBalance to:', currentTeamData.current_balance || 0)
         
         // Initialize selected items with current team
         setSelectedDrivers(currentTeamData.drivers || [])
@@ -76,6 +80,17 @@ export default function TeamEditor() {
   }
 
   const handleDriverSelect = (driver) => {
+    // Prevent selecting/deselecting sold drivers
+    if (soldDrivers.find(d => d.id === driver.id)) {
+      return // Do nothing if driver is sold
+    }
+    
+    // Prevent selecting/deselecting current team members who haven't been sold yet
+    const isCurrentTeamMember = currentDrivers.find(d => d.id === driver.id)
+    if (isCurrentTeamMember && !soldDrivers.find(d => d.id === driver.id)) {
+      return // Do nothing if driver is in current team but not sold
+    }
+    
     if (selectedDrivers.find(d => d.id === driver.id)) {
       // Deselecting driver
       setSelectedDrivers(selectedDrivers.filter(d => d.id !== driver.id))
@@ -87,8 +102,8 @@ export default function TeamEditor() {
       }
       
       // Check budget constraint
-      if (wouldExceedBudget(driver.current_price)) {
-        showBudgetWarning(driver.name, driver.current_price)
+      if (wouldExceedAvailableBudget(driver.current_price)) {
+        showEditBudgetWarning(driver.name, driver.current_price)
         return
       }
       
@@ -97,15 +112,28 @@ export default function TeamEditor() {
   }
 
   const handleConstructorSelect = (constructor) => {
+    // Prevent selecting/deselecting sold constructor
+    if (soldConstructor && soldConstructor.id === constructor.id) {
+      return // Do nothing if constructor is sold
+    }
+    
+    // Prevent selecting/deselecting current constructor who hasn't been sold yet
+    const isCurrentTeamMember = currentConstructor && currentConstructor.id === constructor.id
+    if (isCurrentTeamMember && !(soldConstructor && soldConstructor.id === constructor.id)) {
+      return // Do nothing if constructor is in current team but not sold
+    }
+    
     if (selectedConstructor && selectedConstructor.id === constructor.id) {
       // Deselecting constructor
       setSelectedConstructor(null)
     } else {
       // Selecting new constructor
-      if (wouldExceedBudget(constructor.current_price)) {
-        showBudgetWarning(constructor.name, constructor.current_price)
+      // Check budget constraint
+      if (wouldExceedAvailableBudget(constructor.current_price)) {
+        showEditBudgetWarning(constructor.name, constructor.current_price)
         return
       }
+      
       setSelectedConstructor(constructor)
     }
   }
@@ -160,44 +188,92 @@ export default function TeamEditor() {
     console.log('After update - selectedConstructor:', selectedConstructor)
   }
 
-  const wouldExceedBudget = (additionalCost) => {
-    const currentCost = getTotalCost()
-    const soldMoney = getSoldMoney()
-    const availableBudget = currentBalance + soldMoney
-    return (currentCost + additionalCost) > availableBudget
+  const handleClearChanges = () => {
+    // Reset selections back to current team
+    setSelectedDrivers([...currentDrivers])
+    setSelectedConstructor(currentConstructor)
+    setSoldDrivers([])
+    setSoldConstructor(null)
+    
+    alert('Changes cleared! Your selections have been reset to your current team.')
   }
 
-  const getTotalCost = () => {
-    const driversCost = selectedDrivers.reduce((sum, driver) => sum + driver.current_price, 0)
-    const constructorCost = selectedConstructor ? selectedConstructor.current_price : 0
-    return driversCost + constructorCost
+  // Budget Tracker Functions for Edit Team Page
+  const getSaleProceeds = () => {
+    const driverSales = soldDrivers.reduce((total, driver) => total + driver.current_price, 0)
+    const constructorSales = soldConstructor ? soldConstructor.current_price : 0
+    return driverSales + constructorSales
   }
 
-  const getSoldMoney = () => {
-    // Use current market values for sold items
-    const driversMoney = soldDrivers.reduce((sum, driver) => {
-      const currentDriver = drivers.find(d => d.id === driver.id)
-      return sum + (currentDriver ? currentDriver.current_price : 0)
-    }, 0)
-
-    const constructorMoney = soldConstructor ? 
-      (constructors.find(c => c.id === soldConstructor.id)?.current_price || 0) : 0
-
-    return driversMoney + constructorMoney
+  const getAvailableBudget = () => {
+    return currentBalance + getSaleProceeds() - getNewSelectionsCost()
   }
 
-  const getRemainingBudget = () => {
-    const soldMoney = getSoldMoney()
-    const availableBudget = currentBalance + soldMoney
-    return availableBudget - getTotalCost()
+  const getAvailableBudgetColor = () => {
+    const available = getAvailableBudget()
+    if (available >= 50) return '#16a34a'      // $50M+ = Green
+    if (available >= 25) return '#ca8a04'      // $25M-$49M = Yellow  
+    if (available >= 10) return '#ea580c'      // $10M-$24M = Orange
+    return '#dc2626'                            // $0M-$9M = Red
   }
 
-  const isBudgetExceeded = () => {
-    return getRemainingBudget() < 0
+  const getNewSelectionsCost = () => {
+    // Only calculate cost of NEW selections (replacements)
+    const newDriverCost = selectedDrivers
+      .filter(driver => !currentDrivers.find(cd => cd.id === driver.id))
+      .reduce((total, driver) => total + driver.current_price, 0)
+    
+    const newConstructorCost = selectedConstructor && 
+      (!currentConstructor || selectedConstructor.id !== currentConstructor.id) 
+      ? selectedConstructor.current_price : 0
+    
+    return newDriverCost + newConstructorCost
   }
 
-  const showBudgetWarning = (itemName, cost) => {
-    alert(`Cannot add ${itemName} ($${cost}M) - would exceed available budget of $${getRemainingBudget()}M`)
+  const getEditBudgetLimit = () => {
+    return 100
+  }
+
+  const getBudgetUsagePercentage = () => {
+    const cost = getAvailableBudget()
+    const maxBudget = getEditBudgetLimit()
+    // Cap at 100% to prevent slider from breaking
+    const percentage = Math.round((cost / getEditBudgetLimit()) * 100)
+    return Math.min(percentage, 100)
+  }
+
+  const getEditProgressBarColor = () => {
+    const percentage = getBudgetUsagePercentage()
+    if (percentage <= 50) return '#dc2626'      // 0-50% = Red 
+    if (percentage <= 75) return '#ea580c'      // 51-75% = Orange
+    if (percentage <= 90) return '#ca8a04'      // 76-90% = Yellow
+    return '#16a34a'                            // 91-100% = Green
+  }
+
+  const isEditBudgetExceeded = () => {
+    const available = getAvailableBudget()
+    return available < 0
+  }
+
+  const wouldExceedEditBudget = (additionalCost) => {
+    const currentCost = getNewSelectionsCost()
+    return (currentCost + additionalCost) > getEditBudgetLimit()
+  }
+
+  const wouldExceedAvailableBudget = (additionalCost) => {
+    const currentCost = getNewSelectionsCost()
+    const totalAvailable = currentBalance + getSaleProceeds()
+    // Check if adding this cost would exceed total available funds
+    return (currentCost + additionalCost) > totalAvailable
+  }
+
+  const showEditBudgetWarning = (itemName, cost) => {
+    const currentCost = getNewSelectionsCost()
+    const newTotal = currentCost + cost
+    const available = getAvailableBudget()
+    const overBudget = newTotal - available
+    
+    alert(`⚠️ Insufficient Funds!\n\nAdding ${itemName} ($${cost}M) would make your new selections total $${newTotal}M, which is $${overBudget}M over your available budget of $${available}M.\n\nPlease sell more items or select cheaper replacements to stay within your available budget.`)
   }
 
   const handleSubmitTeam = async () => {
@@ -211,10 +287,12 @@ export default function TeamEditor() {
       return
     }
     
-    if (isBudgetExceeded()) {
-      alert('Team exceeds available budget. Please adjust your selections.')
+    if (isEditBudgetExceeded()) {
+      alert('Team exceeds available budget. Please adjust your selections or sell more items.')
       return
     }
+    
+
 
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -240,7 +318,7 @@ export default function TeamEditor() {
 
       if (response.ok) {
         const result = await response.json()
-        alert(`Team updated successfully!\n\nTotal Cost: $${getTotalCost()}M\nBudget Remaining: $${getRemainingBudget()}M`)
+        alert(`Team updated successfully!`)
         
         // Redirect to my-team page
         window.location.href = '/my-team'
@@ -308,150 +386,242 @@ export default function TeamEditor() {
         
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-          {/* Left Column - Current Team and Rules */}
-          <div className="w-full space-y-6">
+          {/* Left Column - Transfer Rules */}
+          <div className="w-full">
+            {/* Transfer Rules Box */}
+            <div className="bg-gradient-to-br from-blue-800 to-blue-900 p-8 rounded-2xl border border-blue-600 h-full">
+              <h2 className="text-2xl font-bold text-white mb-6">📋 Transfer Rules</h2>
+              <div className="grid grid-cols-1 gap-6 text-gray-300">
+                <div className="flex items-center space-x-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span className="text-lg">Sell current drivers/constructor at their current market value</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span className="text-lg">Use remaining balance + sale proceeds to buy replacements</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span className="text-lg">Maintain exactly 2 drivers + 1 constructor</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-green-400 text-xl">✓</span>
+                  <span className="text-lg">Stay within your available budget</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Current Team */}
+          <div className="w-full">
             {/* Current Team Box */}
-            <div className="bg-green-500 rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">🏎️ Current Team</h2>
+            <div className="bg-white rounded-lg shadow-lg p-6 h-full">
+              <h2 className="text-2xl font-bold text-black mb-4">🏎️ Current Team</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Current Drivers:</h3>
+                  <h3 className="text-lg font-semibold text-black mb-2">Current Drivers:</h3>
                   <div className="grid grid-cols-1 gap-2">
                     {currentDrivers && currentDrivers.length > 0 ? (
                       currentDrivers.map(driver => (
                         <div key={driver.id} className="flex items-center justify-between bg-gray-100 p-3 rounded-lg border border-gray-200">
-                          <div className="text-gray-800">
-                            <div className="font-medium">{driver.name} - ${driver.current_price}M</div>
-                            <div className="text-sm text-gray-600">Original: ${driver.original_cost}M</div>
+                          <div className="text-black">
+                            <div className="font-medium">{driver.name} - <span style={{color: '#f97316'}}>${driver.current_price}M</span></div>
+                            <div className="text-sm text-black">Bought Price: <span style={{color: '#43A047'}}>${driver.original_cost}M</span></div>
                           </div>
                           <button
                             onClick={() => handleDriverSale(driver)}
-                            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                              soldDrivers.find(d => d.id === driver.id)
-                                ? 'bg-red-600 text-white hover:bg-red-700'
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
+                            className="px-3 py-1 rounded text-sm font-medium transition-colors"
+                            style={{
+                              backgroundColor: soldDrivers.find(d => d.id === driver.id) ? '#dc2626' : '#2563eb',
+                              color: soldDrivers.find(d => d.id === driver.id) ? '#ffffff' : '#f97316'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!soldDrivers.find(d => d.id === driver.id)) {
+                                e.target.style.backgroundColor = '#1d4ed8'
+                                e.target.style.color = '#ffffff'
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!soldDrivers.find(d => d.id === driver.id)) {
+                                e.target.style.backgroundColor = '#2563eb'
+                                e.target.style.color = '#dc2626'
+                              }
+                            }}
                           >
                             {soldDrivers.find(d => d.id === driver.id) ? 'Selling' : 'Sell'}
                           </button>
                         </div>
                       ))
                     ) : (
-                      <div className="text-gray-500 text-center py-4">No drivers in current team</div>
+                      <div className="text-black text-center py-4">No drivers in current team</div>
                     )}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Current Constructor:</h3>
+                  <h3 className="text-lg font-semibold text-black mb-2">Current Constructor:</h3>
                   {currentConstructor ? (
                     <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg border border-gray-200">
-                      <div className="text-gray-800">
-                        <div className="font-medium">{currentConstructor.name} - ${currentConstructor.current_price}M</div>
-                        <div className="text-sm text-gray-600">Original: ${currentConstructor.original_cost}M</div>
+                      <div className="text-black">
+                        <div className="font-medium">{currentConstructor.name} - <span style={{color: '#f97316'}}>${currentConstructor.current_price}M</span></div>
+                        <div className="text-sm text-black">Bought Price: <span style={{color: '#43A047'}}>${currentConstructor.original_cost}M</span></div>
                       </div>
                       <button
                         onClick={() => handleConstructorSale(currentConstructor)}
-                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                          soldConstructor && soldConstructor.id === currentConstructor.id
-                            ? 'bg-red-600 text-white hover:bg-red-700'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                        className="px-3 py-1 rounded text-sm font-medium transition-colors"
+                        style={{
+                          backgroundColor: soldConstructor && soldConstructor.id === currentConstructor.id ? '#dc2626' : '#2563eb',
+                          color: soldConstructor && soldConstructor.id === currentConstructor.id ? '#ffffff' : '#f97316'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!(soldConstructor && soldConstructor.id === currentConstructor.id)) {
+                            e.target.style.backgroundColor = '#1d4ed8'
+                            e.target.style.color = '#ffffff'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!(soldConstructor && soldConstructor.id === currentConstructor.id)) {
+                            e.target.style.backgroundColor = '#2563eb'
+                            e.target.style.color = '#dc2626'
+                          }
+                        }}
                       >
                         {soldConstructor && soldConstructor.id === currentConstructor.id ? 'Selling' : 'Sell'}
                       </button>
                     </div>
                   ) : (
-                    <div className="text-gray-500 text-center py-4">No constructor in current team</div>
+                    <div className="text-black text-center py-4">No constructor in current team</div>
                   )}
                 </div>
               </div>
             </div>
-
-            {/* Transfer Rules Box */}
-            <div className="bg-gradient-to-br from-blue-800 to-blue-900 p-6 rounded-2xl border border-blue-600">
-              <h2 className="text-2xl font-bold text-white mb-4">📋 Transfer Rules</h2>
-              <div className="grid grid-cols-1 gap-4 text-gray-300">
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-400">✓</span>
-                  <span>Sell current drivers/constructor at their current market value</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-400">✓</span>
-                  <span>Use remaining balance + sale proceeds to buy replacements</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-400">✓</span>
-                  <span>Maintain exactly 2 drivers + 1 constructor</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-400">✓</span>
-                  <span>Stay within your available budget</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Budget Tracker */}
-            <BudgetTracker 
-              totalCost={getTotalCost()}
-              totalBudget={currentBalance + getSoldMoney()}
-              remainingBudget={getRemainingBudget()}
-              soldMoney={getSoldMoney()}
-              isExceeded={isBudgetExceeded()}
-            />
-
-            {/* Submit Button */}
-            <button
-              onClick={handleSubmitTeam}
-              disabled={isBudgetExceeded() || selectedDrivers.length !== MAX_DRIVERS || !selectedConstructor}
-              className={`w-full py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${
-                isBudgetExceeded() || selectedDrivers.length !== MAX_DRIVERS || !selectedConstructor
-                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transform hover:scale-105'
-              }`}
-            >
-              Update Team
-            </button>
           </div>
+        </div>
 
-          {/* Right Column - Available Drivers and Constructors */}
-          <div className="space-y-6">
-            {/* Drivers Section */}
+        {/* Available Drivers and Constructors */}
+        <div className="mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Drivers Section - Left Column */}
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Select Drivers ({selectedDrivers.length}/{MAX_DRIVERS})</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <h2 className="text-2xl font-bold text-black mb-4">Select Drivers ({selectedDrivers.length}/{MAX_DRIVERS})</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {drivers.map(driver => (
                   <DriverCard
                     key={driver.id}
                     driver={driver}
                     isSelected={selectedDrivers.some(d => d.id === driver.id)}
                     isCurrent={currentDrivers.find(d => d.id === driver.id)}
-                    isSold={soldDrivers.find(d => d.id === driver.id)}
+                    isSold={!!soldDrivers.find(d => d.id === driver.id)}
                     onSelect={() => handleDriverSelect(driver)}
-                    disabled={selectedDrivers.length >= MAX_DRIVERS && !selectedDrivers.some(d => d.id === driver.id)}
+                    disabled={
+                      selectedDrivers.length >= MAX_DRIVERS && !selectedDrivers.some(d => d.id === driver.id) ||
+                      (!selectedDrivers.some(d => d.id === driver.id) && wouldExceedAvailableBudget(driver.current_price))
+                    }
                   />
                 ))}
               </div>
             </div>
 
-            {/* Constructor Selection */}
+            {/* Constructor Selection - Right Column */}
             <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Select Constructor</h2>
-              <div className="grid grid-cols-2 gap-3">
+              <h2 className="text-2xl font-bold text-black mb-4">Select Constructor</h2>
+              <div className="grid grid-cols-2 gap-6">
                 {constructors.map(constructor => (
                   <ConstructorCard
                     key={constructor.id}
                     constructor={constructor}
                     isSelected={selectedConstructor?.id === constructor.id}
                     isCurrent={currentConstructor && currentConstructor.id === constructor.id}
-                    isSold={soldConstructor && soldConstructor.id === constructor.id}
+                    isSold={!!(soldConstructor && soldConstructor.id === constructor.id)}
                     onSelect={() => handleConstructorSelect(constructor)}
-                    disabled={wouldExceedBudget(constructor.current_price)}
+                    disabled={
+                      selectedConstructor && selectedConstructor.id !== constructor.id ||
+                      (!selectedConstructor || selectedConstructor.id !== constructor.id) && wouldExceedAvailableBudget(constructor.current_price)
+                    }
                   />
                 ))}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Budget Tracker */}
+        <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold text-black mb-4">💰 Budget Tracker</h2>
+          <div className="space-y-4">
+            {/* Budget Information */}
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Sale Proceeds</div>
+                <div className="text-2xl font-bold text-green-600">+${getSaleProceeds()}M</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600 mb-1">Available Budget</div>
+                <div className="text-2xl font-bold" style={{color: getAvailableBudgetColor()}}>${getAvailableBudget()}M</div>
+              </div>
+            </div>
+
+            {/* New Selections Cost */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-lg font-semibold text-black">New Selections Cost:</span>
+                <span className="text-xl font-bold text-green-600">${getNewSelectionsCost()}M</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Budget Limit:</span>
+                <span className="text-lg font-bold text-red-600">${getEditBudgetLimit()}M</span>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Available Budget</span>
+                <span className="text-gray-600">{getBudgetUsagePercentage()}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="h-3 rounded-full transition-all duration-300"
+                  style={{
+                    backgroundColor: getEditProgressBarColor(),
+                    width: `${Math.max(getBudgetUsagePercentage(), 1)}%`
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Budget Status */}
+            <div className="text-center">
+              {isEditBudgetExceeded() ? (
+                <div className="text-red-800 font-semibold">⚠️ Budget Exceeded!</div>
+              ) : (
+                <div className="text-green-600 font-semibold">✅ Within Budget</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex gap-4">
+          <button
+            onClick={handleClearChanges}
+            className="flex-1 py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 bg-gray-600 text-white hover:bg-gray-700 transform hover:scale-105"
+          >
+            Clear Changes
+          </button>
+          <button
+            onClick={handleSubmitTeam}
+            disabled={selectedDrivers.length !== MAX_DRIVERS || !selectedConstructor || isEditBudgetExceeded()}
+            className={`flex-1 py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 ${
+              selectedDrivers.length !== MAX_DRIVERS || !selectedConstructor || isEditBudgetExceeded()
+                ? 'bg-gray-500 text-gray-700 cursor-not-allowed'
+                : 'bg-gradient-to-r from-green-700 text-white hover:from-green-800 hover:to-green-900 transform hover:scale-105'
+            }`}
+          >
+            Update Team
+          </button>
+        </div>
+        
+
       </div>
     )
   } catch (renderError) {

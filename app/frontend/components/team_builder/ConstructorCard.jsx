@@ -29,8 +29,8 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled, isCurren
       className={`
         relative border-2 rounded-lg p-2 transition-all duration-200
         ${isSelected ? 'shadow-lg scale-105 cursor-pointer' : disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400 hover:shadow-md'}
-        ${isCurrent ? 'border-green-500' : ''}
-        ${isSold ? 'border-red-600 bg-red-50' : ''}
+        ${isCurrent && !isSold ? 'border-green-500 cursor-not-allowed opacity-75' : isCurrent ? 'border-green-500' : ''}
+        ${isSold ? 'border-red-600 bg-red-50 cursor-not-allowed opacity-75' : ''}
       `}
       style={{
         borderColor: isSelected ? getConstructorColor(constructor.name).border : 
@@ -42,8 +42,15 @@ const ConstructorCard = ({ constructor, isSelected, onSelect, disabled, isCurren
                           isSold ? '#FEF2F2' : 
                           disabled ? '#F3F4F6' : '#F3F4F6'
       }}
-      onClick={() => !disabled && onSelect()}
-      title={disabled ? `${constructor.name} would exceed budget` : isSelected ? `Click to deselect ${constructor.name}` : `Click to select ${constructor.name}`}
+      onClick={() => {
+        console.log('ConstructorCard clicked:', constructor.name, 'isSold:', isSold, 'isCurrent:', isCurrent, 'disabled:', disabled)
+        if (disabled || isSold || (isCurrent && !isSold)) {
+          console.log('ConstructorCard click blocked - disabled, sold, or current team member')
+          return
+        }
+        onSelect()
+      }}
+      title={isSold ? `${constructor.name} is sold and cannot be selected` : disabled ? `${constructor.name} would exceed budget` : isSelected ? `Click to deselect ${constructor.name}` : `Click to select ${constructor.name}`}
     >
       {/* Selection Indicator */}
       {isSelected && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import DriverCard from './DriverCard'
 import ConstructorCard from './ConstructorCard'
-import BudgetTracker from './BudgetTracker'
+
 import TeamSummary from './TeamSummary'
 
 const TeamBuilder = () => {
@@ -12,13 +12,15 @@ const TeamBuilder = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const BUDGET_LIMIT = 100 // $100M budget
+
   const MAX_DRIVERS = 2 // Changed from 5 to 2
   const MAX_DRIVERS_PER_TEAM = 2
 
   useEffect(() => {
     fetchData()
   }, [])
+
+
 
   const fetchData = async () => {
     try {
@@ -114,27 +116,52 @@ const TeamBuilder = () => {
     }
   }
 
+
+
   const getTotalCost = () => {
     const driversCost = selectedDrivers.reduce((sum, driver) => sum + driver.current_price, 0)
     const constructorCost = selectedConstructor ? selectedConstructor.current_price : 0
     return driversCost + constructorCost
   }
 
-  const isBudgetExceeded = () => getTotalCost() > BUDGET_LIMIT
-  
-  // Check if adding an item would exceed budget
-  const wouldExceedBudget = (itemPrice) => {
-    const currentTotal = getTotalCost()
-    return (currentTotal + itemPrice) > BUDGET_LIMIT
+  const getBudgetLimit = () => {
+    return 100
   }
-  
-  // Show budget warning
-  const showBudgetWarning = (itemName, itemPrice) => {
+
+  const getRemainingBudget = () => {
+    return getBudgetLimit() - getTotalCost()
+  }
+
+  const getRemainingBudgetColor = () => {
+    const remaining = getRemainingBudget()
+    if (remaining >= 50) return '#16a34a'      // $50M+ = Green
+    if (remaining >= 25) return '#ca8a04'      // $25M-$49M = Yellow  
+    if (remaining >= 10) return '#ea580c'      // $10M-$24M = Orange
+    return '#dc2626'                           // $0M-$9M = Red
+  }
+
+  const getProgressBarColor = () => {
+    const remaining = getRemainingBudget()
+    if (remaining >= 50) return '#16a34a'      // $50M+ = Green
+    if (remaining >= 25) return '#ca8a04'      // $25M-$49M = Yellow  
+    if (remaining >= 10) return '#ea580c'      // $10M-$24M = Orange
+    return '#dc2626'                           // $0M-$9M = Red
+  }
+
+  const isBudgetExceeded = () => {
+    return getTotalCost() > getBudgetLimit()
+  }
+
+  const wouldExceedBudget = (additionalCost) => {
+    return (getTotalCost() + additionalCost) > getBudgetLimit()
+  }
+
+  const showBudgetWarning = (itemName, cost) => {
     const currentTotal = getTotalCost()
-    const newTotal = currentTotal + itemPrice
-    const overBudget = newTotal - BUDGET_LIMIT
+    const newTotal = currentTotal + cost
+    const overBudget = newTotal - getBudgetLimit()
     
-    alert(`⚠️ Budget Exceeded!\n\nAdding ${itemName} ($${itemPrice}M) would make your team total $${newTotal}M, which is $${overBudget}M over your $${BUDGET_LIMIT}M budget.\n\nPlease remove some drivers or select a cheaper constructor to stay within budget.`)
+    alert(`⚠️ Budget Exceeded!\n\nAdding ${itemName} ($${cost}M) would make your team total $${newTotal}M, which is $${overBudget}M over your $${getBudgetLimit()}M budget.\n\nPlease remove some drivers or select a cheaper constructor to stay within budget.`)
   }
 
   const handleClearAll = () => {
@@ -154,7 +181,7 @@ const TeamBuilder = () => {
     }
     
     if (isBudgetExceeded()) {
-      alert('Team exceeds budget limit')
+      alert('Team exceeds budget limit. Please adjust your selections.')
       return
     }
 
@@ -191,7 +218,7 @@ const TeamBuilder = () => {
 
       if (response.ok) {
         const result = await response.json()
-        alert(`Team created successfully!\n\nTotal Cost: $${getTotalCost()}M\nStatus: Active`)
+        alert(`Team created successfully!\n\nStatus: Active`)
         
         // Reset selections
         setSelectedDrivers([])
@@ -242,11 +269,7 @@ const TeamBuilder = () => {
 
   return (
     <div className="w-full p-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-f1-red-600 mb-2">F1 Team Builder</h1>
-        <p className="text-gray-400 text-lg">Select your drivers and constructor within the budget</p>
-      </div>
-
+    
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
         {/* Left Column - Team Rules and Drivers */}
         <div className="w-full space-y-6">
@@ -334,24 +357,70 @@ const TeamBuilder = () => {
                   constructor={constructor}
                   isSelected={selectedConstructor?.id === constructor.id}
                   onSelect={() => handleConstructorSelect(constructor)}
-                  disabled={wouldExceedBudget(constructor.current_price)}
+
                 />
               ))}
             </div>
           </div>
 
           {/* Budget Tracker */}
-          <BudgetTracker
-            totalCost={getTotalCost()}
-            budgetLimit={BUDGET_LIMIT}
-            isExceeded={isBudgetExceeded()}
-          />
+          <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-purple-500">
+            <h2 className="text-xl font-bold text-black mb-4">Budget Tracker</h2>
+            
+            {/* Budget Display */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-purple-100">Total Cost:</span>
+                <span className="font-bold text-lg text-green-600">
+                  ${getTotalCost()}M
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-purple-100">Budget Limit:</span>
+                <span className="font-bold text-lg text-red-600">
+                  ${getBudgetLimit()}M
+                </span>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="h-3 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${Math.max((getTotalCost() / getBudgetLimit()) * 100, 1)}%`,
+                    backgroundColor: getProgressBarColor()
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-gray-600 mt-1">
+                <span>0%</span>
+                <span>{Math.round((getTotalCost() / getBudgetLimit()) * 100)}%</span>
+                <span>100%</span>
+              </div>
+            </div>
+
+                          {/* Remaining Budget */}
+              <div className="text-center">
+                <span className="text-sm text-gray-600">Remaining:</span>
+                <span 
+                  key={`remaining-${getRemainingBudget()}`}
+                  className="text-xl font-bold"
+                  style={{ 
+                    color: getRemainingBudgetColor()
+                  }}
+                >
+                  ${getRemainingBudget()}M
+                </span>
+              </div>
+          </div>
 
           {/* Team Summary */}
           <TeamSummary
             drivers={selectedDrivers}
             constructor={selectedConstructor}
-            totalCost={getTotalCost()}
+
             onSubmit={handleSubmitTeam}
             onClearAll={handleClearAll}
             isValid={selectedDrivers.length === MAX_DRIVERS && selectedConstructor && !isBudgetExceeded()}

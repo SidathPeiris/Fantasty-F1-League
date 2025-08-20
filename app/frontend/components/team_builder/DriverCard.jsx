@@ -29,11 +29,11 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled, isCurrent, isSold 
   return (
     <div
       className={`
-        relative border-2 rounded-lg p-3 cursor-pointer transition-all duration-200
-        ${isSelected ? 'shadow-lg scale-105' : 'hover:border-gray-400 hover:shadow-md'}
+        relative border-2 rounded-lg p-3 transition-all duration-200
+        ${isSelected ? 'shadow-lg scale-105 cursor-pointer' : 'hover:border-gray-400 hover:shadow-md cursor-pointer'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-        ${isCurrent ? 'border-green-500' : ''}
-        ${isSold ? 'border-red-600 bg-red-50' : ''}
+        ${isCurrent && !isSold ? 'border-green-500 cursor-not-allowed opacity-75' : isCurrent ? 'border-green-500' : ''}
+        ${isSold ? 'border-red-600 bg-red-50 cursor-not-allowed opacity-75' : ''}
       `}
       style={{
         borderColor: isSelected ? getTeamColor(driver.team).border : 
@@ -43,7 +43,14 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled, isCurrent, isSold 
                           isCurrent ? '#F0FDF4' : 
                           isSold ? '#FEF2F2' : '#F3F4F6'
       }}
-      onClick={() => !disabled && onSelect()}
+      onClick={() => {
+        console.log('DriverCard clicked:', driver.name, 'isSold:', isSold, 'isCurrent:', isCurrent, 'disabled:', disabled)
+        if (disabled || isSold || (isCurrent && !isSold)) {
+          console.log('DriverCard click blocked - disabled, sold, or current team member')
+          return
+        }
+        onSelect()
+      }}
     >
       {/* Selection Indicator */}
       {isSelected && (
@@ -91,7 +98,7 @@ const DriverCard = ({ driver, isSelected, onSelect, disabled, isCurrent, isSold 
 
       {/* Driver Info */}
       <div className="text-center">
-        <h3 className="font-bold text-gray-800 text-xs mb-1">{driver.name}</h3>
+        <h3 className="font-bold text-black text-xs mb-1">{driver.name}</h3>
         <p className="text-xs mb-1" style={{ color: getTeamColor(driver.team).border }}>
           {driver.team}
         </p>
