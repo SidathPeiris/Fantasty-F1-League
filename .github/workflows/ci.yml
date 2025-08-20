@@ -16,8 +16,11 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: '3.3.5'
           bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
@@ -32,8 +35,11 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: '3.3.5'
           bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
         run: bin/importmap audit
@@ -47,8 +53,11 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: '3.3.5'
           bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
 
       - name: Lint code for consistent style
         run: bin/rubocop -f github
@@ -72,8 +81,11 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
+          ruby-version: '3.3.5'
           bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
 
       - name: Run tests
         env:
