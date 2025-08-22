@@ -1,6 +1,7 @@
 class Race < ApplicationRecord
   has_many :driver_results, dependent: :destroy
   has_many :constructor_results, dependent: :destroy
+  has_many :qualifying_results, dependent: :destroy
   
   validates :name, presence: true
   validates :date, presence: true

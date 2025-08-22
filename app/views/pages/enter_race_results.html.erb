@@ -1,0 +1,436 @@
+<!-- Enter Race Results Page -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+  <!-- Navigation Header -->
+  <%= render 'shared/navigation' %>
+  
+  <!-- Page Title -->
+  <div class="bg-gradient-to-br from-gray-900 to-gray-800 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-white text-center mb-2">🏁 Enter Race Results</h1>
+      <p class="text-xl text-gray-300 text-center">Admin-only: Manually enter race results for the Fantasy F1 League</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      
+      <!-- Race Selection -->
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">🏁 Select Race</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% @races.each do |race| %>
+            <button 
+              onclick="selectRace('<%= race.id %>', '<%= race.name %>')"
+              class="race-selector p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+              data-race-id="<%= race.id %>"
+            >
+              <h4 class="font-semibold text-gray-900"><%= race.name %></h4>
+              <p class="text-sm text-gray-600"><%= race.date.strftime("%B %d, %Y") %></p>
+              <p class="text-sm text-gray-500"><%= race.circuit %></p>
+              <div class="mt-2">
+                <% if race.driver_results.any? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    ✓ Results Complete
+                  </span>
+                  <div class="mt-1 text-xs text-gray-500">
+                    Click to view/edit
+                  </div>
+                <% else %>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    ⚠ No Results
+                  </span>
+                  <div class="mt-1 text-xs text-gray-500">
+                    Click to enter results
+                  </div>
+                <% end %>
+              </div>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Results Entry Form -->
+      <div id="results-form" class="hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6" id="selected-race-name"></h3>
+          
+          <%= form_with url: "/submit-race-results", method: :post, local: true, class: "space-y-6" do |form| %>
+            <%= form.hidden_field :race_id, id: "race_id_field" %>
+            
+            <!-- Driver Results (Top 10) -->
+            <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+              <h4 class="text-xl font-semibold text-blue-900 mb-4">🏎️ Driver Results (Top 10)</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <% (1..10).each do |position| %>
+                  <div class="border border-blue-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-blue-900 mb-2">P<%= position %></label>
+                    <select name="driver_results[<%= position %>][driver_id]" class="w-full border border-blue-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option value="">Select Driver</option>
+                      <% @drivers.each do |driver| %>
+                        <option value="<%= driver.id %>"><%= driver.name %> (<%= driver.team %>)</option>
+                      <% end %>
+                    </select>
+                    <input 
+                      type="number" 
+                      name="driver_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-blue-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      value="<%= [25, 18, 15, 12, 10, 8, 6, 4, 2, 1][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Constructor Results -->
+            <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-green-900">🏭 Constructor Results (Auto-populated from Top 3 Drivers)</h4>
+                <button 
+                  type="button" 
+                  onclick="updateConstructorResults()" 
+                  class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                >
+                  🔄 Update
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% (1..3).each do |position| %>
+                  <div class="border border-green-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-green-900 mb-2"><%= position.ordinalize %> Place</label>
+                    <input 
+                      type="text" 
+                      name="constructor_results[<%= position %>][constructor_name]" 
+                      id="constructor_<%= position %>_name"
+                      class="w-full border border-green-300 rounded-md px-3 py-2 text-sm mb-2 bg-gray-100"
+                      readonly
+                      placeholder="Will auto-populate from driver selection"
+                    >
+                    <input 
+                      type="hidden" 
+                      name="constructor_results[<%= position %>][constructor_id]" 
+                      id="constructor_<%= position %>_id"
+                    >
+                    <input 
+                      type="number" 
+                      name="constructor_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-green-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value="<%= [10, 5, 2][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+              <div class="mt-3 p-2 bg-blue-100 border border-blue-300 rounded text-blue-800 text-sm">
+                💡 <strong>Tip:</strong> Constructor results automatically populate when you select drivers for positions 1-3. 
+                Use the "Update" button above if they don't appear automatically.
+              </div>
+            </div>
+            
+            <!-- Qualifying Results -->
+            <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+              <h4 class="text-xl font-semibold text-purple-900 mb-4">⚡ Qualifying Results (Top 3)</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% (1..3).each do |position| %>
+                  <div class="border border-purple-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-purple-900 mb-2">P<%= position %></label>
+                    <select name="qualifying_results[<%= position %>][driver_id]" class="w-full border border-purple-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                      <option value="">Select Driver</option>
+                      <% @drivers.each do |driver| %>
+                        <option value="<%= driver.id %>"><%= driver.name %> (<%= driver.team %>)</option>
+                      <% end %>
+                    </select>
+                    <input 
+                      type="number" 
+                      name="qualifying_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-purple-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      value="<%= [5, 3, 1][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+
+            
+            <!-- Submit Button -->
+            <div class="text-center">
+              <button type="submit" class="px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-xl font-bold rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                🏁 Submit Race Results
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Back to Admin Button -->
+      <div class="text-center mt-8">
+        <a href="/admin" class="inline-flex items-center px-6 py-3 bg-gray-600 text-white text-lg font-semibold rounded-lg hover:bg-gray-700 transition-colors duration-200">
+          ← Back to Admin Panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function selectRace(raceId, raceName) {
+      document.getElementById('results-form').classList.remove('hidden');
+      document.getElementById('race_id_field').value = raceId;
+      document.getElementById('selected-race-name').textContent = raceName;
+      
+      // Update button styling
+      document.querySelectorAll('.race-selector').forEach(btn => {
+        btn.classList.remove('border-blue-500', 'bg-blue-100');
+        btn.classList.add('border-gray-200');
+      });
+      event.target.classList.remove('border-gray-200');
+      event.target.classList.add('border-blue-500', 'bg-blue-100');
+      
+      // Clear form first
+      clearFormData();
+      
+      // Load existing race results if they exist, otherwise just enable live auto-population
+      loadExistingResults(raceId);
+      
+      // Scroll to form
+      document.getElementById('results-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Load existing race results into the form
+    function loadExistingResults(raceId) {
+      // Show loading indicator
+      const submitButton = document.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = '⏳ Loading...';
+      submitButton.disabled = true;
+      
+      // Fetch existing results from the server
+      fetch(`/api/v1/races/${raceId}/results`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.results.driver_results && data.results.driver_results.length > 0) {
+            populateFormWithResults(data.results);
+            console.log('Existing results loaded successfully');
+          } else {
+            console.log('No existing results found for this race - enabling live auto-population');
+            // Enable live auto-population for races without results
+            enableLiveAutoPopulation();
+          }
+        })
+        .catch(error => {
+          console.log('Error loading existing results:', error);
+          // Enable live auto-population even if there's an error
+          enableLiveAutoPopulation();
+        })
+        .finally(() => {
+          // Restore submit button
+          submitButton.textContent = originalText;
+          submitButton.disabled = false;
+        });
+    }
+
+    // Populate form with existing results
+    function populateFormWithResults(results) {
+      console.log('Populating form with results:', results);
+      
+      // Populate driver results
+      if (results.driver_results) {
+        console.log('Populating driver results:', results.driver_results);
+        results.driver_results.forEach(result => {
+          const driverSelect = document.querySelector(`select[name="driver_results[${result.position}][driver_id]"]`);
+          if (driverSelect) {
+            driverSelect.value = result.driver_id;
+            console.log(`Set driver position ${result.position} to ${result.driver_id}`);
+          }
+        });
+      }
+      
+      // Populate qualifying results
+      if (results.qualifying_results) {
+        results.qualifying_results.forEach(result => {
+          const qualifyingSelect = document.querySelector(`select[name="qualifying_results[${result.position}][driver_id]"]`);
+          if (qualifyingSelect) {
+            qualifyingSelect.value = result.driver_id;
+          }
+        });
+      }
+      
+      // Populate constructor results from existing data first
+      if (results.constructor_results) {
+        console.log('Populating constructor results:', results.constructor_results);
+        results.constructor_results.forEach(result => {
+          const constructorName = document.getElementById(`constructor_${result.position}_name`);
+          if (constructorName) {
+            constructorName.value = result.constructor;
+            console.log(`Set constructor position ${result.position} to ${result.constructor}`);
+          }
+        });
+      }
+      
+      // Then update constructor results based on loaded driver data
+      // Use setTimeout to ensure DOM is fully updated first
+      setTimeout(() => {
+        updateConstructorResults();
+      }, 100);
+    }
+
+    // Enable live auto-population for races without existing results
+    function enableLiveAutoPopulation() {
+      console.log('Enabling live auto-population for new race entry');
+      
+      // Ensure all driver select elements have event listeners
+      for (let i = 1; i <= 10; i++) {
+        const driverSelect = document.querySelector(`select[name="driver_results[${i}][driver_id]"]`);
+        if (driverSelect) {
+          // Remove existing listeners to prevent duplicates
+          driverSelect.removeEventListener('change', updateConstructorResults);
+          // Add fresh listener
+          driverSelect.addEventListener('change', updateConstructorResults);
+        }
+      }
+      
+      // Clear any existing constructor data to start fresh
+      for (let i = 1; i <= 3; i++) {
+        const constructorName = document.getElementById(`constructor_${i}_name`);
+        if (constructorName) {
+          constructorName.value = '';
+        }
+      }
+      
+      console.log('Live auto-population enabled - constructor results will update as you select drivers');
+    }
+
+    // Clear form data
+    function clearFormData() {
+      // Clear driver selections
+      for (let i = 1; i <= 10; i++) {
+        const driverSelect = document.querySelector(`select[name="driver_results[${i}][driver_id]"]`);
+        if (driverSelect) driverSelect.value = '';
+      }
+      
+      // Clear constructor fields
+      for (let i = 1; i <= 3; i++) {
+        const constructorName = document.getElementById(`constructor_${i}_name`);
+        if (constructorName) constructorName.value = '';
+      }
+      
+      // Clear qualifying selections
+      for (let i = 1; i <= 3; i++) {
+        const qualifyingSelect = document.querySelector(`select[name="qualifying_results[${i}][driver_id]"]`);
+        if (qualifyingSelect) qualifyingSelect.value = '';
+      }
+    }
+
+    // Auto-populate constructor results based on top 3 driver selections
+    function updateConstructorResults() {
+      console.log('Updating constructor results...');
+      
+      // Only clear constructor fields if they're empty or if we're manually updating
+      // This prevents clearing existing data when loading results
+      let shouldClear = true;
+      for (let i = 1; i <= 3; i++) {
+        const constructorName = document.getElementById(`constructor_${i}_name`);
+        if (constructorName && constructorName.value.trim()) {
+          shouldClear = false;
+          break;
+        }
+      }
+      
+      if (shouldClear) {
+        for (let i = 1; i <= 3; i++) {
+          const constructorName = document.getElementById(`constructor_${i}_name`);
+          const constructorId = document.getElementById(`constructor_${i}_id`);
+          if (constructorName) constructorName.value = '';
+          if (constructorId) constructorId.value = '';
+        }
+      }
+
+      // Get top 3 driver selections
+      const top3Drivers = [];
+      for (let i = 1; i <= 3; i++) {
+        const driverSelect = document.querySelector(`select[name="driver_results[${i}][driver_id]"]`);
+        if (driverSelect && driverSelect.value) {
+          const selectedOption = driverSelect.options[driverSelect.selectedIndex];
+          const driverName = selectedOption.text.split(' (')[0];
+          const teamName = selectedOption.text.match(/\(([^)]+)\)/)?.[1];
+          if (teamName) {
+            top3Drivers.push({ position: i, driver: driverName, team: teamName });
+            console.log(`Position ${i}: ${driverName} (${teamName})`);
+          }
+        }
+      }
+
+      if (top3Drivers.length === 0) {
+        console.log('No drivers selected in top 3 positions');
+        return;
+      }
+
+      // Populate constructor results based on team performance
+      const teamPositions = {};
+      top3Drivers.forEach(driver => {
+        if (!teamPositions[driver.team]) {
+          teamPositions[driver.team] = [];
+        }
+        teamPositions[driver.team].push(driver.position);
+      });
+
+      // Sort teams by best driver position (lowest number = best)
+      const sortedTeams = Object.entries(teamPositions)
+        .sort(([, positionsA], [, positionsB]) => Math.min(...positionsA) - Math.min(...positionsB));
+
+      console.log('Sorted teams:', sortedTeams);
+
+      // Assign constructor positions based on driver positions
+      // Constructor P1 = Team with driver in P1, Constructor P2 = Team with driver in P2, etc.
+      top3Drivers.forEach(driver => {
+        const constructorPosition = driver.position; // Use actual driver position
+        const teamName = driver.team;
+        
+        const constructorNameField = document.getElementById(`constructor_${constructorPosition}_name`);
+        if (constructorNameField) {
+          constructorNameField.value = teamName;
+          console.log(`Constructor P${constructorPosition}: ${teamName} (from driver P${driver.position})`);
+        }
+      });
+    }
+
+    // Add event listeners to all driver selects and form submission
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add event listeners to all driver selects (positions 1-10)
+      for (let i = 1; i <= 10; i++) {
+        const driverSelect = document.querySelector(`select[name="driver_results[${i}][driver_id]"]`);
+        if (driverSelect) {
+          driverSelect.addEventListener('change', updateConstructorResults);
+        }
+      }
+      
+      // Add event listener to form submission to ensure constructor results are populated
+      const form = document.querySelector('form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          // Force update constructor results before submission
+          updateConstructorResults();
+          
+          // Validate that constructor results are populated
+          let hasConstructorResults = false;
+          for (let i = 1; i <= 3; i++) {
+            const constructorName = document.getElementById(`constructor_${i}_name`);
+            if (constructorName && constructorName.value.trim()) {
+              hasConstructorResults = true;
+              break;
+            }
+          }
+          
+          if (!hasConstructorResults) {
+            e.preventDefault();
+            alert('Please ensure driver results for positions 1-3 are selected so constructor results can be auto-populated.');
+            return false;
+          }
+        });
+      }
+    });
+  </script>
+</div>

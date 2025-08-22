@@ -23,10 +23,10 @@ class Api::V1::DriversController < Api::V1::BaseController
   def rails_blob_url(attachment)
     return nil unless attachment.attached?
     
-    # Use the signed blob URL directly
-    Rails.application.routes.url_helpers.rails_blob_url(attachment, host: request.base_url)
+    # Use custom photo controller instead of Active Storage URLs
+    Rails.application.routes.url_helpers.driver_photo_path(attachment.record.id)
   rescue => e
-    Rails.logger.error "Failed to generate blob URL: #{e.message}"
+    Rails.logger.error "Failed to generate photo URL: #{e.message}"
     nil
   end
 end

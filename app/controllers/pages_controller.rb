@@ -287,7 +287,7 @@ class PagesController < ApplicationController
       render json: { success: false, message: "Failed to update team: #{e.message}" }, status: 400
     end
   end
-
+  
   def update_ratings
     require_login
     F1DataService.update_all_ratings!
@@ -612,5 +612,120 @@ class PagesController < ApplicationController
     else
       redirect_to admin_path, alert: "❌ Error checking for new results: #{result[:error]}"
     end
+  end
+
+  def enter_race_results
+    require_login
+    unless current_user.username == "SidathPeiris"
+      redirect_to dashboard_path, alert: "Access denied. Admin privileges required."
+      return
+    end
+    
+    @races = Race.order(:date)
+    @drivers = Driver.all
+    @constructors = Constructor.all
+  end
+
+  def submit_race_results
+    require_login
+    unless current_user.username == "SidathPeiris"
+      redirect_to dashboard_path, alert: "Access denied. Admin privileges required."
+      return
+    end
+    
+    race_id = params[:race_id]
+    race = Race.find(race_id)
+    
+    # Clear existing results for this race
+    race.driver_results.destroy_all
+    race.constructor_results.destroy_all
+    race.qualifying_results.destroy_all
+    
+    # Create driver results (Top 10)
+    if params[:driver_results]
+      params[:driver_results].each do |position, result|
+        next if result[:driver_id].blank?
+        
+        # Find the driver to get their name and team
+        driver = Driver.find(result[:driver_id])
+        
+        DriverResult.create!(
+          race: race,
+          driver: driver.name,
+          team: driver.team,
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
+    # Create constructor results (Top 3) - auto-populated from driver selections
+    if params[:constructor_results]
+      params[:constructor_results].each do |position, result|
+        next if result[:constructor_name].blank?
+        
+        ConstructorResult.create!(
+          race: race,
+          constructor: result[:constructor_name],
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
+    # Create qualifying results (Top 3)
+    if params[:qualifying_results]
+      params[:qualifying_results].each do |position, result|
+        next if result[:driver_id].blank?
+        QualifyingResult.create!(
+          race: race,
+          driver_id: result[:driver_id],
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
+    redirect_to "/enter-race-results", notice: "Race results for #{race.name} have been saved successfully!"
+  end
+
+  def get_race_results
+    require_login
+    unless current_user.username == "SidathPeiris"
+      render json: { success: false, message: "Access denied. Admin privileges required." }, status: 403
+      return
+    end
+    
+    race = Race.find(params[:id])
+    
+    results = {
+      driver_results: race.driver_results.map do |dr|
+        {
+          position: dr.position,
+          driver_id: Driver.find_by(name: dr.driver)&.id,
+          driver_name: dr.driver,
+          team: dr.team,
+          points: dr.points
+        }
+      end,
+      constructor_results: race.constructor_results.map do |cr|
+        {
+          position: cr.position,
+          constructor: cr.constructor,
+          points: cr.points
+        }
+      end,
+      qualifying_results: race.qualifying_results.map do |qr|
+        {
+          position: qr.position,
+          driver_id: qr.driver_id,
+          points: qr.points
+        }
+      end
+    }
+    
+    render json: { success: true, results: results }
+  rescue => e
+    render json: { success: false, message: "Error fetching race results: #{e.message}" }, status: 500
   end
 end

@@ -40,6 +40,11 @@ Rails.application.routes.draw do
         # First Race Date Management
         post "admin/set-first-race-date", to: "pages#set_first_race_date"
         get "admin/get-first-race-date", to: "pages#get_first_race_date"
+        
+        # Race Results Entry
+        get "enter-race-results", to: "pages#enter_race_results"
+        post "submit-race-results", to: "pages#submit_race_results"
+        get "api/v1/races/:id/results", to: "pages#get_race_results"
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
@@ -59,6 +64,9 @@ Rails.application.routes.draw do
   # Sessions (login/logout)
   post "sessions", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
+  
+  # Photos
+  get "photos/driver/:id", to: "photos#driver", as: :driver_photo
 
   # Reveal health check on /up
   get "up" => "rails/health#show", as: :rails_health_check
