@@ -84,12 +84,31 @@ Visit **http://localhost:3000** to see your Fantasy F1 League in action! 🏁
 - **📱 Dashboard Integration** - Team status indicators and create team button management
 - **💾 Database Persistence** - Complete team data storage with driver/constructor associations
 - **🎯 User Experience** - Intuitive interface with hover effects and responsive design
+- **📸 Driver Photos** - Professional driver photos displayed in team builder and team pages
+- **🏁 Qualifying Results** - Complete qualifying system with points tracking (P1: 3, P2: 2, P3: 1)
+
+### 🏁 **Race & Qualifying System** ✅
+- **📊 Race Results Management** - Complete race results entry system for administrators
+- **🏁 Qualifying Results** - Track qualifying positions with dedicated points system
+- **📈 Performance Scoring** - Race points (P1: 25, P2: 18, P3: 15, P4: 12, P5: 10, P6: 8, P7: 6, P8: 4, P9: 2, P10: 1)
+- **⚡ Fastest Lap Bonus** - +1 point for fastest lap in race
+- **🏆 Qualifying Points** - P1: 3, P2: 2, P3: 1 points for qualifying performance
+- **📝 Admin Controls** - Comprehensive race results entry interface
+- **💾 Data Persistence** - Complete race and qualifying data storage
+
+### 📸 **Driver Photo System** ✅
+- **🖼️ Professional Photos** - High-quality driver photos throughout the application
+- **🔧 Custom Photo Controller** - Reliable photo serving with custom endpoints
+- **📱 Responsive Display** - Photos work perfectly on all devices and screen sizes
+- **🎨 SVG Placeholders** - Professional fallback images for all drivers
+- **⚡ Fast Loading** - Optimized photo delivery for smooth user experience
+- **🔒 Secure Access** - Photos served through secure, authenticated endpoints
 
 ### 🎮 **Upcoming Fantasy League Features**
 
 #### **Core Features**
 - **✅ Fantasy Team Creation** - Users build their fantasy teams (COMPLETED)
-- **🏁 Race Results Tracking** - Real-time race outcomes and points
+- **✅ Race Results Tracking** - Race outcomes and points system (COMPLETED)
 - **📊 Live Leaderboards** - Real-time standings and rankings
 - **🔄 Team Management** - Add/drop drivers, transfer windows
 
@@ -133,9 +152,21 @@ Fantasty-F1-League/
 │   │   ├── application_controller.rb
 │   │   ├── pages_controller.rb
 │   │   ├── sessions_controller.rb
-│   │   └── users_controller.rb
+│   │   ├── users_controller.rb
+│   │   ├── photos_controller.rb
+│   │   └── api/v1/
+│   │       ├── base_controller.rb
+│   │       ├── drivers_controller.rb
+│   │       └── constructors_controller.rb
 │   ├── models/
-│   │   └── user.rb
+│   │   ├── user.rb
+│   │   ├── driver.rb
+│   │   ├── constructor.rb
+│   │   ├── race.rb
+│   │   ├── driver_result.rb
+│   │   ├── constructor_result.rb
+│   │   ├── qualifying_result.rb
+│   │   └── team.rb
 │   ├── views/
 │   │   ├── layouts/
 │   │   │   └── application.html.erb
@@ -143,17 +174,37 @@ Fantasty-F1-League/
 │   │   │   ├── dashboard.html.erb
 │   │   │   ├── home.html.erb
 │   │   │   ├── login.html.erb
-│   │   │   └── signup.html.erb
+│   │   │   ├── signup.html.erb
+│   │   │   ├── create_team.html.erb
+│   │   │   ├── my_team.html.erb
+│   │   │   ├── edit_team.html.erb
+│   │   │   ├── admin_panel.html.erb
+│   │   │   └── enter_race_results.html.erb
 │   │   └── sessions/
+│   ├── frontend/
+│   │   └── components/
+│   │       └── team_builder/
+│   │           ├── TeamBuilder.jsx
+│   │           ├── DriverCard.jsx
+│   │           └── ConstructorCard.jsx
 │   └── assets/
 │       └── stylesheets/
 │           └── application.tailwind.css
 ├── config/
 │   ├── routes.rb
+│   ├── storage.yml
 │   └── tailwind.config.js
 ├── db/
 │   ├── migrate/
-│   │   └── 20250802111200_create_users.rb
+│   │   ├── 20250802111200_create_users.rb
+│   │   ├── 20250806100049_create_races.rb
+│   │   ├── 20250806100053_create_driver_results.rb
+│   │   ├── 20250806100057_create_constructor_results.rb
+│   │   ├── 20250806100102_create_drivers.rb
+│   │   ├── 20250806100106_create_constructors.rb
+│   │   ├── 20250812000001_create_teams.rb
+│   │   ├── 20250812000002_create_team_selections.rb
+│   │   └── 20250822093030_create_qualifying_results.rb
 │   └── schema.rb
 └── README.md
 ```
@@ -288,6 +339,10 @@ rails db:seed
 - [x] Rating color system throughout website
 - [x] Form validation and error handling
 - [x] Dashboard team status indicators
+- [x] Driver photo system with professional images
+- [x] Qualifying results system with points tracking
+- [x] Race results management for administrators
+- [x] Complete scoring system (race + qualifying points)
 - [ ] Real-time race updates with Turbo Streams
 - [ ] Live leaderboards and rankings
 - [ ] Driver performance analytics
@@ -343,6 +398,36 @@ If you have any questions or need help, please open an issue on GitHub or contac
 ---
 
 **🏎️ Ready to start your Fantasy F1 journey? Sign up today and join the race! 🏁**
+
+## 🏆 **Fantasy League Scoring System**
+
+The Fantasy F1 League features a comprehensive scoring system that tracks both race performance and qualifying results:
+
+### **🏁 Race Points System:**
+- **P1**: 25 points + Fastest Lap Bonus (+1)
+- **P2**: 18 points + Fastest Lap Bonus (+1)
+- **P3**: 15 points + Fastest Lap Bonus (+1)
+- **P4**: 12 points + Fastest Lap Bonus (+1)
+- **P5**: 10 points + Fastest Lap Bonus (+1)
+- **P6**: 8 points + Fastest Lap Bonus (+1)
+- **P7**: 6 points + Fastest Lap Bonus (+1)
+- **P8**: 4 points + Fastest Lap Bonus (+1)
+- **P9**: 2 points + Fastest Lap Bonus (+1)
+- **P10**: 1 point + Fastest Lap Bonus (+1)
+- **P11-P20**: 0 points
+- **DNF**: 0 points (no fastest lap bonus)
+
+### **🏆 Qualifying Points System:**
+- **P1**: 3 points
+- **P2**: 2 points  
+- **P3**: 1 point
+- **P4-P20**: 0 points
+
+### **💰 Team Budget System:**
+- **Total Budget**: $100M
+- **Driver Limit**: 2 drivers
+- **Constructor Limit**: 1 constructor
+- **Dynamic Pricing**: Based on championship position and performance ratings
 
 ## 🏎️ Weekly Rating Update Process
 
