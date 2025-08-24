@@ -1,0 +1,271 @@
+<!-- My Stats Page -->
+<div class="min-h-screen bg-gradient-to-br from-gray-900 via-red-900 to-black">
+  <!-- Navigation Header -->
+  <%= render 'shared/navigation' %>
+
+  <!-- Page Title -->
+  <div class="bg-gradient-to-br from-gray-900 to-gray-800 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-white text-center mb-2">My Stats</h1>
+      <p class="text-xl text-gray-300 text-center mb-4">Detailed breakdown of your Fantasy F1 League performance</p>
+      <p class="text-lg text-gray-400 text-center">Track your progress, analyze your strategy, and dominate the competition!</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <% if @team %>
+      <!-- Team Overview -->
+      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 mb-8 shadow-2xl">
+        <div class="text-center mb-6">
+          <h2 class="text-3xl font-bold text-white mb-4">🏆 <%= @team.name %></h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-red-800 to-red-900 p-4 rounded-xl">
+              <div class="text-2xl font-bold text-white mb-1"><%= @total_season_points %></div>
+              <div class="text-gray-300 text-sm">Total Season Points</div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-4 rounded-xl">
+              <div class="text-2xl font-bold text-white mb-1"><%= @race_points.length %></div>
+              <div class="text-gray-300 text-sm">Races Completed</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-800 to-green-900 p-4 rounded-xl">
+              <div class="text-2xl font-bold text-white mb-1"><%= @user_ranking %></div>
+              <div class="text-gray-300 text-sm">Current Ranking</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Composition -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div class="bg-gray-700 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold text-white mb-3">🚗 Your Drivers</h3>
+            <div class="space-y-2">
+              <% @team.team_selections.where(selectable_type: 'Driver').each do |ts| %>
+                <% driver = ts.selectable %>
+                <div class="flex justify-between items-center bg-gray-600 p-2 rounded">
+                  <span class="text-white"><%= driver.name %></span>
+                  <span class="text-sm font-medium" style="color: <%= get_team_color(driver.team) %>">(<%= driver.team %>)</span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          
+          <div class="bg-gray-700 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold text-white mb-3">🏭 Your Constructor</h3>
+            <% constructor_ts = @team.team_selections.where(selectable_type: 'Constructor').first %>
+            <% if constructor_ts %>
+              <% constructor = constructor_ts.selectable %>
+              <div class="bg-gray-600 p-2 rounded">
+                <span class="font-medium" style="color: <%= get_team_color(constructor.name) %>"><%= constructor.name %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Race-by-Race Breakdown -->
+      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 mb-8 shadow-2xl">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center">🏁 Race-by-Race Breakdown</h2>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <% @race_points.each do |race_data| %>
+            <% race = race_data[:race] %>
+            <% score = race_data[:score] %>
+            <% is_sprint = race_data[:is_sprint_race] %>
+            
+            <div class="bg-gray-700 p-6 rounded-xl border border-gray-600">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-white">
+                  🏁 <%= race.name %> 
+                  <span class="text-sm font-normal text-gray-300">(<%= race.date.strftime('%B %d, %Y') %>)</span>
+                </h3>
+                <div class="flex items-center space-x-2">
+                  <% if is_sprint %>
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-yellow-400">
+                      🏁 Sprint Race
+                    </span>
+                  <% end %>
+                  <span class="text-2xl font-bold text-green-400"><%= score[:total_score] %></span>
+                  <span class="text-gray-400 text-sm">points</span>
+                </div>
+              </div>
+
+              <!-- Main Race Results -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-600 p-4 rounded-lg">
+                  <h4 class="text-lg font-semibold text-white mb-3">🏎️ Main Race</h4>
+                  
+                  <!-- Driver Results -->
+                  <div class="mb-3">
+                    <h5 class="text-sm font-medium text-gray-300 mb-2">Driver Results:</h5>
+                    <div class="space-y-2">
+                      <% @team.team_selections.where(selectable_type: 'Driver').each do |ts| %>
+                        <% driver = ts.selectable %>
+                        <% driver_result = race.driver_results.find { |r| r.driver == driver.name } %>
+                        <% if driver_result %>
+                          <div class="flex justify-between items-center bg-gray-500 p-2 rounded text-sm">
+                            <span class="text-white"><%= driver.name %></span>
+                            <div class="flex items-center space-x-2">
+                              <span class="text-gray-300">P<%= driver_result.position %></span>
+                              <span class="text-green-400">(<%= driver_result.points %> pts)</span>
+                            </div>
+                          </div>
+                        <% else %>
+                          <div class="flex justify-between items-center bg-gray-500 p-2 rounded text-sm">
+                            <span class="text-gray-400"><%= driver.name %></span>
+                            <span class="text-red-400">No Points</span>
+                          </div>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <!-- Points Breakdown -->
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-300">Base Driver Points:</span>
+                      <span class="text-white"><%= score[:base_driver_points] %></span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-300">Driver Placing Multiplier:</span>
+                      <span class="text-yellow-400"><%= score[:multiplier] %>x</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-300">Multiplied Driver Points:</span>
+                      <span class="text-yellow-400"><%= score[:multiplied_driver_points] %></span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-300">Constructor Points:</span>
+                      <span class="text-white"><%= score[:constructor_points] %></span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-gray-300">Qualifying Points:</span>
+                      <span class="text-white"><%= score[:qualifying_bonus] %></span>
+                    </div>
+                    <div class="border-t border-gray-500 pt-2">
+                      <div class="flex justify-between font-semibold">
+                        <span class="text-gray-300">Main Race Total:</span>
+                        <span class="text-green-400"><%= score[:multiplied_driver_points] + score[:constructor_points] + score[:qualifying_bonus] %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sprint Event Results (if applicable) -->
+                <% if is_sprint %>
+                  <div class="bg-gray-600 p-4 rounded-lg">
+                    <h4 class="text-lg font-semibold text-white mb-3">🏁 Sprint Event</h4>
+                    
+                    <!-- Sprint Driver Results -->
+                    <div class="mb-3">
+                      <h5 class="text-sm font-medium text-gray-300 mb-2">Sprint Race Results:</h5>
+                      <div class="space-y-2">
+                        <% @team.team_selections.where(selectable_type: 'Driver').each do |ts| %>
+                          <% driver = ts.selectable %>
+                          <% sprint_result = race.sprint_results.find { |s| s.driver_id == driver.id } %>
+                          <% if sprint_result %>
+                            <div class="flex justify-between items-center bg-gray-500 p-2 rounded text-sm">
+                              <span class="text-white"><%= driver.name %></span>
+                              <div class="flex items-center space-x-2">
+                                <span class="text-gray-300">P<%= sprint_result.position %></span>
+                                <span class="text-green-400">(<%= sprint_result.points %> pts)</span>
+                              </div>
+                            </div>
+                          <% else %>
+                            <div class="flex justify-between items-center bg-gray-500 p-2 rounded text-sm">
+                              <span class="text-gray-400"><%= driver.name %></span>
+                              <span class="text-red-400">No Points</span>
+                            </div>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    </div>
+
+                    <!-- Sprint Points Breakdown -->
+                    <div class="space-y-2 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-gray-300">Base Driver Points Points:</span>
+                        <span class="text-white"><%= score[:base_sprint_points] || 0 %></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-300">Driver Multiplier:</span>
+                        <span class="text-yellow-400"><%= score[:sprint_multiplier] || 1.0 %>x</span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-300">Multiplied Driver Points:</span>
+                        <span class="text-yellow-400"><%= score[:sprint_race_points] %></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-300">Constructor Points:</span>
+                        <span class="text-white"><%= score[:constructor_sprint_points] %></span>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-300">Qualifying Points:</span>
+                        <span class="text-white"><%= score[:sprint_qualifying_bonus] %></span>
+                      </div>
+                      <div class="border-t border-gray-500 pt-2">
+                        <div class="flex justify-between font-semibold">
+                          <span class="text-gray-300">Sprint Total:</span>
+                          <span class="text-green-400"><%= score[:sprint_race_points] + score[:sprint_qualifying_bonus] + score[:constructor_sprint_points] %></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Season Summary -->
+      <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 shadow-2xl">
+        <h2 class="text-2xl font-bold text-white mb-6 text-center">📊 Season Summary</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-gradient-to-br from-red-800 to-red-900 p-6 rounded-xl text-center">
+            <div class="text-3xl font-bold text-white mb-2">
+              <%= @race_points.sum { |rp| rp[:score][:multiplied_driver_points] + rp[:score][:constructor_points] } %>
+            </div>
+            <div class="text-gray-300">Main Race Points</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-blue-800 to-blue-900 p-6 rounded-xl text-center">
+            <div class="text-3xl font-bold text-white mb-2">
+              <%= @race_points.sum { |rp| rp[:score][:sprint_race_points] + rp[:score][:constructor_sprint_points] } %>
+            </div>
+            <div class="text-gray-300">Sprint Race Points</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-800 to-green-900 p-6 rounded-xl text-center">
+            <div class="text-3xl font-bold text-white mb-2">
+              <%= @race_points.sum { |rp| rp[:score][:qualifying_bonus] } %>
+            </div>
+            <div class="text-gray-300">Main Race Qualifying Points</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-yellow-800 to-yellow-900 p-6 rounded-xl text-center">
+            <div class="text-3xl font-bold text-white mb-2">
+              <%= @race_points.sum { |rp| rp[:score][:sprint_qualifying_bonus] } %>
+            </div>
+            <div class="text-gray-300">Sprint Race Qualifying Points</div>
+          </div>
+        </div>
+
+
+      </div>
+
+    <% else %>
+      <!-- No Team Message -->
+      <div class="text-center py-16">
+        <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700 max-w-2xl mx-auto">
+          <h2 class="text-2xl font-bold text-white mb-4">No Team Found</h2>
+          <p class="text-gray-300 mb-6">You need to create a team first to view your stats.</p>
+          <a href="/create-team" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-300">
+            Create Your Team
+          </a>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

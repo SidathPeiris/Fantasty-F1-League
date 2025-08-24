@@ -1,6 +1,7 @@
 class Constructor < ApplicationRecord
   has_one_attached :logo
   has_many :constructor_results, foreign_key: :constructor, primary_key: :name
+  has_many :constructor_sprint_results, dependent: :destroy
   
   validates :name, presence: true, uniqueness: true
   validates :base_price, presence: true, numericality: { only_integer: true, greater_than: 0 }

@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  race: one
+  driver: one
+  position: 1
+  points: 1
+
+two:
+  race: two
+  driver: two
+  position: 1
+  points: 1

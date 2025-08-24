@@ -26,5 +26,8 @@ module FantastyF1League
     
     # Add services directory to autoload paths
     config.autoload_paths += %W(#{config.root}/app/services)
+    
+    # Add controllers directory to autoload paths for development mode
+    config.autoload_paths += %W(#{config.root}/app/controllers) if Rails.env.development?
   end
 end

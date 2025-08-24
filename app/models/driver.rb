@@ -1,6 +1,8 @@
 class Driver < ApplicationRecord
   has_one_attached :photo
   has_many :driver_results, foreign_key: :driver, primary_key: :name
+  has_many :sprint_results, dependent: :destroy
+  has_many :sprint_qualifying_results, dependent: :destroy
   
   validates :name, presence: true, uniqueness: true
   validates :team, presence: true

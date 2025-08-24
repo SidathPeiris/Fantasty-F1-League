@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get "login", to: "pages#login"
   get "dashboard", to: "pages#dashboard"
   get "my-team", to: "pages#my_team"
+  get "my-stats", to: "pages#my_stats"
     get "create-team", to: "pages#create_team"
   post "create-team", to: "pages#create_team_submit"
   get "edit-team", to: "pages#edit_team"
@@ -53,6 +54,12 @@ Rails.application.routes.draw do
       resources :teams, only: [:index, :show, :create, :update, :destroy] do
         member do
           post :submit
+        end
+      end
+      resources :races, only: [] do
+        member do
+          get :results
+          patch :update_sprint_status
         end
       end
     end

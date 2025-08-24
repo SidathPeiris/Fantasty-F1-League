@@ -20,32 +20,59 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-6">🏁 Select Race</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <% @races.each do |race| %>
-            <button 
-              onclick="selectRace('<%= race.id %>', '<%= race.name %>')"
-              class="race-selector p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
-              data-race-id="<%= race.id %>"
-            >
-              <h4 class="font-semibold text-gray-900"><%= race.name %></h4>
-              <p class="text-sm text-gray-600"><%= race.date.strftime("%B %d, %Y") %></p>
-              <p class="text-sm text-gray-500"><%= race.circuit %></p>
-              <div class="mt-2">
-                <% if race.driver_results.any? %>
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    ✓ Results Complete
-                  </span>
-                  <div class="mt-1 text-xs text-gray-500">
-                    Click to view/edit
+            <div class="race-card border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors bg-white">
+              <div class="p-4">
+                <button 
+                  onclick="selectRace('<%= race.id %>', '<%= race.name %>')"
+                  class="race-selector w-full text-left"
+                  data-race-id="<%= race.id %>"
+                >
+                  <h4 class="font-semibold text-gray-900"><%= race.name %></h4>
+                  <p class="text-sm text-gray-600"><%= race.date.strftime("%B %d, %Y") %></p>
+                  <p class="text-sm text-gray-500"><%= race.circuit %></p>
+                  <div class="mt-2">
+                    <% if race.driver_results.any? %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Results Complete
+                      </span>
+                      <div class="mt-1 text-xs text-gray-500">
+                        Click to view/edit
+                      </div>
+                    <% else %>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        ⚠ No Results
+                      </span>
+                      <div class="mt-1 text-xs text-gray-500">
+                        Click to enter results
+                      </div>
+                    <% end %>
+                    
+                    <% if race.sprint_race %>
+                      <div class="mt-2">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-300">
+                          🏁 Sprint Race
+                        </span>
+                      </div>
+                    <% end %>
                   </div>
-                <% else %>
-                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    ⚠ No Results
-                  </span>
-                  <div class="mt-1 text-xs text-gray-500">
-                    Click to enter results
-                  </div>
-                <% end %>
+                </button>
               </div>
-            </button>
+              
+              <!-- Sprint Race Checkbox -->
+              <div class="px-4 pb-4 border-t border-gray-200 pt-3 bg-gradient-to-r from-red-600 to-orange-600">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    class="sprint-race-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-2 transition-all duration-200"
+                    data-race-id="<%= race.id %>"
+                    <%= 'checked' if race.sprint_race %>
+                    onchange="updateSprintRaceStatus('<%= race.id %>', this.checked)"
+                  >
+                  <span class="text-sm font-medium text-red-700">🏁 Sprint Race</span>
+                </label>
+                <p class="text-xs text-red-600 mt-1 font-medium">Check if this race includes a sprint event</p>
+              </div>
+            </div>
           <% end %>
         </div>
       </div>
@@ -68,7 +95,7 @@
                     <select name="driver_results[<%= position %>][driver_id]" class="w-full border border-blue-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                       <option value="">Select Driver</option>
                       <% @drivers.each do |driver| %>
-                        <option value="<%= driver.id %>"><%= driver.name %> (<%= driver.team %>)</option>
+                        <option value="<%= driver.id %>" data-team="<%= driver.team %>" data-team-color="<%= get_team_color(driver.team) %>"><%= driver.name %> (<%= driver.team %>)</option>
                       <% end %>
                     </select>
                     <input 
@@ -91,7 +118,7 @@
                 <button 
                   type="button" 
                   onclick="updateConstructorResults()" 
-                  class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                  class="px-3 py-1 bg-black text-white text-sm rounded hover:bg-green-700 transition-colors"
                 >
                   🔄 Update
                 </button>
@@ -140,7 +167,7 @@
                     <select name="qualifying_results[<%= position %>][driver_id]" class="w-full border border-purple-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                       <option value="">Select Driver</option>
                       <% @drivers.each do |driver| %>
-                        <option value="<%= driver.id %>"><%= driver.name %> (<%= driver.team %>)</option>
+                        <option value="<%= driver.id %>" data-team="<%= driver.team %>" data-team-color="<%= get_team_color(driver.team) %>"><%= driver.name %> (<%= driver.team %>)</option>
                       <% end %>
                     </select>
                     <input 
@@ -148,12 +175,130 @@
                       name="qualifying_results[<%= position %>][points]" 
                       placeholder="Points" 
                       class="w-full border border-purple-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                      value="<%= [5, 3, 1][position-1] %>"
+                      value="<%= [3, 2, 1][position-1] %>"
                       readonly
                     >
                   </div>
                 <% end %>
               </div>
+            </div>
+            
+            <!-- Sprint Race Results (Conditional) -->
+            <div id="sprint-race-section" class="hidden bg-white rounded-lg p-6 border border-red-200">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-red-900">🏁 Sprint Race Results (Top 8)</h4>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-red-800 border border-red-300">
+                  Sprint Event
+                </span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <% (1..8).each do |position| %>
+                  <div class="border border-red-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-red-900 mb-2">P<%= position %></label>
+                    <select name="sprint_results[<%= position %>][driver_id]" class="w-full border border-red-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                      <option value="">Select Driver</option>
+                      <% @drivers.each do |driver| %>
+                        <option value="<%= driver.id %>" data-team="<%= driver.team %>" data-team-color="<%= get_team_color(driver.team) %>"><%= driver.name %> (<%= driver.team %>)</option>
+                      <% end %>
+                    </select>
+                    <input 
+                      type="number" 
+                      name="sprint_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-red-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      value="<%= [8, 7, 6, 5, 4, 3, 2, 1][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Constructor Sprint Results (Conditional) -->
+            <div id="constructor-sprint-section" class="hidden bg-white rounded-lg p-6 border border-red-200">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-red-900">🏭 Constructor Sprint Results (Auto-populated from Top 3 Drivers)</h4>
+                <button 
+                  type="button" 
+                  onclick="updateConstructorSprintResults()" 
+                  class="px-3 py-1 bg-black text-white text-sm rounded hover:bg-red-700 transition-colors"
+                >
+                  🔄 Update
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% (1..3).each do |position| %>
+                  <div class="border border-red-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-red-900 mb-2"><%= position.ordinalize %> Place</label>
+                    <input 
+                      type="text" 
+                      name="constructor_sprint_results[<%= position %>][constructor_name]" 
+                      id="constructor_sprint_<%= position %>_name"
+                      class="w-full border border-red-300 rounded-md px-3 py-2 text-sm mb-2 bg-gray-100"
+                      readonly
+                      placeholder="Will auto-populate from sprint driver selection"
+                    >
+                    <input 
+                      type="hidden" 
+                      name="constructor_sprint_results[<%= position %>][constructor_id]" 
+                      id="constructor_sprint_<%= position %>_id"
+                    >
+                    <input 
+                      type="number" 
+                      name="constructor_sprint_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-red-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      value="<%= [3, 2, 1][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+              <div class="mt-3 p-2 bg-red-100 border border-red-300 rounded text-red-800 text-sm">
+                💡 <strong>Tip:</strong> Constructor sprint results automatically populate when you select drivers for sprint positions 1-3. 
+                Use the "Update" button above if they don't appear automatically.
+              </div>
+              
+              <!-- Sprint Multiplier Info -->
+              <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+                🏆 <strong>Sprint Race Team Multipliers:</strong><br>
+                • 1st + 2nd Place: 1.5× multiplier to sprint race points<br>
+                • 1st + 3rd Place: 1.3× multiplier to sprint race points<br>
+                • 2nd + 3rd Place: 1.1× multiplier to sprint race points<br>
+                <em>Individual positions get standard points, team combinations get multipliers!</em>
+              </div>
+            </div>
+            
+            <!-- Sprint Qualifying Results (Conditional) -->
+            <div id="sprint-qualifying-section" class="hidden bg-white rounded-lg p-6 border border-red-200">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-red-900">🏁 Sprint Qualifying Results (Top 3)</h4>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-black border border-red-300">
+                  Sprint Event
+                </span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <% (1..3).each do |position| %>
+                  <div class="border border-red-200 rounded-lg p-4 bg-white">
+                    <label class="block text-sm font-medium text-red-900 mb-2">P<%= position %></label>
+                    <select name="sprint_qualifying_results[<%= position %>][driver_id]" class="w-full border border-red-300 rounded-md px-3 py-2 text-sm mb-2 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                      <option value="">Select Driver</option>
+                      <% @drivers.each do |driver| %>
+                        <option value="<%= driver.id %>" data-team="<%= driver.team %>" data-team-color="<%= get_team_color(driver.team) %>"><%= driver.name %> (<%= driver.team %>)</option>
+                      <% end %>
+                    </select>
+                    <input 
+                      type="number" 
+                      name="sprint_qualifying_results[<%= position %>][points]" 
+                      placeholder="Points" 
+                      class="w-full border border-red-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      value="<%= [3, 2, 1][position-1] %>"
+                      readonly
+                    >
+                  </div>
+                <% end %>
+              </div>
+            </div>
 
             
             <!-- Submit Button -->
@@ -188,6 +333,9 @@
       });
       event.target.classList.remove('border-gray-200');
       event.target.classList.add('border-blue-500', 'bg-blue-100');
+      
+      // Check if this race is a sprint race and show/hide sprint sections
+      checkSprintRaceStatus(raceId);
       
       // Clear form first
       clearFormData();
@@ -258,6 +406,36 @@
         });
       }
       
+      // Populate sprint race results
+      if (results.sprint_results) {
+        results.sprint_results.forEach(result => {
+          const sprintSelect = document.querySelector(`select[name="sprint_results[${result.position}][driver_id]"]`);
+          if (sprintSelect) {
+            sprintSelect.value = result.driver_id;
+          }
+        });
+      }
+      
+      // Populate sprint qualifying results
+      if (results.sprint_qualifying_results) {
+        results.sprint_qualifying_results.forEach(result => {
+          const sprintQualifyingSelect = document.querySelector(`select[name="sprint_qualifying_results[${result.position}][driver_id]"]`);
+          if (sprintQualifyingSelect) {
+            sprintQualifyingSelect.value = result.driver_id;
+          }
+        });
+      }
+      
+      // Populate constructor sprint results
+      if (results.constructor_sprint_results) {
+        results.constructor_sprint_results.forEach(result => {
+          const constructorNameField = document.getElementById(`constructor_sprint_${result.position}_name`);
+          if (constructorNameField) {
+            constructorNameField.value = result.constructor_name;
+          }
+        });
+      }
+      
       // Populate constructor results from existing data first
       if (results.constructor_results) {
         console.log('Populating constructor results:', results.constructor_results);
@@ -274,6 +452,11 @@
       // Use setTimeout to ensure DOM is fully updated first
       setTimeout(() => {
         updateConstructorResults();
+        
+        // Also update constructor sprint results if sprint data was loaded
+        if (results.sprint_results && results.sprint_results.length > 0) {
+          updateConstructorSprintResults();
+        }
       }, 100);
     }
 
@@ -303,6 +486,27 @@
       console.log('Live auto-population enabled - constructor results will update as you select drivers');
     }
 
+    // Check sprint race status and show/hide sprint sections
+    function checkSprintRaceStatus(raceId) {
+      const raceCard = document.querySelector(`[data-race-id="${raceId}"]`).closest('.race-card');
+      const sprintCheckbox = raceCard.querySelector('.sprint-race-checkbox');
+      const isSprintRace = sprintCheckbox.checked;
+      
+      const sprintRaceSection = document.getElementById('sprint-race-section');
+      const constructorSprintSection = document.getElementById('constructor-sprint-section');
+      const sprintQualifyingSection = document.getElementById('sprint-qualifying-section');
+      
+      if (isSprintRace) {
+        sprintRaceSection.classList.remove('hidden');
+        constructorSprintSection.classList.remove('hidden');
+        sprintQualifyingSection.classList.remove('hidden');
+      } else {
+        sprintRaceSection.classList.add('hidden');
+        constructorSprintSection.classList.add('hidden');
+        sprintQualifyingSection.classList.add('hidden');
+      }
+    }
+    
     // Clear form data
     function clearFormData() {
       // Clear driver selections
@@ -322,6 +526,98 @@
         const qualifyingSelect = document.querySelector(`select[name="qualifying_results[${i}][driver_id]"]`);
         if (qualifyingSelect) qualifyingSelect.value = '';
       }
+      
+      // Clear sprint race results
+      for (let i = 1; i <= 8; i++) {
+        const sprintSelect = document.querySelector(`select[name="sprint_results[${i}][driver_id]"]`);
+        if (sprintSelect) sprintSelect.value = '';
+      }
+      
+      // Clear sprint qualifying results
+      for (let i = 1; i <= 3; i++) {
+        const sprintQualifyingSelect = document.querySelector(`select[name="sprint_qualifying_results[${i}][driver_id]"]`);
+        if (sprintQualifyingSelect) sprintQualifyingSelect.value = '';
+      }
+      
+      // Clear constructor sprint results
+      for (let i = 1; i <= 3; i++) {
+        const constructorSprintName = document.getElementById(`constructor_sprint_${i}_name`);
+        const constructorSprintId = document.getElementById(`constructor_sprint_${i}_id`);
+        if (constructorSprintName) constructorSprintName.value = '';
+        if (constructorSprintId) constructorSprintId.value = '';
+      }
+    }
+
+    // Auto-populate constructor sprint results based on top 3 sprint driver selections
+    function updateConstructorSprintResults() {
+      console.log('Updating constructor sprint results...');
+      
+      // Only clear constructor sprint fields if they're empty or if we're manually updating
+      let shouldClear = true;
+      for (let i = 1; i <= 3; i++) {
+        const constructorName = document.getElementById(`constructor_sprint_${i}_name`);
+        if (constructorName && constructorName.value.trim()) {
+          shouldClear = false;
+          break;
+        }
+      }
+      
+      if (shouldClear) {
+        for (let i = 1; i <= 3; i++) {
+          const constructorName = document.getElementById(`constructor_sprint_${i}_name`);
+          const constructorId = document.getElementById(`constructor_sprint_${i}_id`);
+          if (constructorName) constructorName.value = '';
+          if (constructorId) constructorId.value = '';
+        }
+      }
+
+      // Get top 3 sprint driver selections
+      const top3SprintDrivers = [];
+      for (let i = 1; i <= 3; i++) {
+        const driverSelect = document.querySelector(`select[name="sprint_results[${i}][driver_id]"]`);
+        if (driverSelect && driverSelect.value) {
+          const selectedOption = driverSelect.options[driverSelect.selectedIndex];
+          const driverName = selectedOption.text.split(' (')[0];
+          const teamName = selectedOption.text.match(/\(([^)]+)\)/)?.[1];
+          if (teamName) {
+            top3SprintDrivers.push({ position: i, driver: driverName, team: teamName });
+            console.log(`Sprint Position ${i}: ${driverName} (${teamName})`);
+          }
+        }
+      }
+
+      if (top3SprintDrivers.length === 0) {
+        console.log('No sprint drivers selected in top 3 positions');
+        return;
+      }
+
+      // Populate constructor sprint results based on team performance
+      const teamPositions = {};
+      top3SprintDrivers.forEach(driver => {
+        if (!teamPositions[driver.team]) {
+          teamPositions[driver.team] = [];
+        }
+        teamPositions[driver.team].push(driver.position);
+      });
+
+      // Sort teams by best driver position (lowest number = best)
+      const sortedTeams = Object.entries(teamPositions)
+        .sort(([, positionsA], [, positionsB]) => Math.min(...positionsA) - Math.min(...positionsB));
+
+      console.log('Sorted sprint teams:', sortedTeams);
+
+      // Assign constructor sprint positions based on driver positions
+      // Constructor P1 = Team with driver in P1, Constructor P2 = Team with driver in P2, etc.
+      top3SprintDrivers.forEach(driver => {
+        const constructorPosition = driver.position; // Use actual driver position
+        const teamName = driver.team;
+        
+        const constructorNameField = document.getElementById(`constructor_sprint_${constructorPosition}_name`);
+        if (constructorNameField) {
+          constructorNameField.value = teamName;
+          console.log(`Constructor Sprint P${constructorPosition}: ${teamName} (from driver P${driver.position})`);
+        }
+      });
     }
 
     // Auto-populate constructor results based on top 3 driver selections
@@ -397,6 +693,60 @@
       });
     }
 
+    // Update sprint race status
+    function updateSprintRaceStatus(raceId, isSprintRace) {
+      console.log(`Updating race ${raceId} sprint status to: ${isSprintRace}`);
+      
+      // Send AJAX request to update sprint race status
+      fetch('/api/v1/races/' + raceId + '/update_sprint_status', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+          sprint_race: isSprintRace
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Sprint race status updated successfully');
+          // Show visual feedback
+          const checkbox = document.querySelector(`input[data-race-id="${raceId}"]`);
+          if (checkbox) {
+            checkbox.classList.add('ring-2', 'ring-green-500');
+            setTimeout(() => {
+              checkbox.classList.remove('ring-2', 'ring-green-500');
+            }, 1000);
+          }
+          
+          // Update sprint sections visibility if this race is currently selected
+          const currentRaceId = document.getElementById('race_id_field').value;
+          if (currentRaceId == raceId) {
+            checkSprintRaceStatus(raceId);
+          }
+        } else {
+          console.error('Failed to update sprint race status:', data.error);
+          // Revert checkbox state on error
+          const checkbox = document.querySelector(`input[data-race-id="${raceId}"]`);
+          if (checkbox) {
+            checkbox.checked = !isSprintRace;
+          }
+          alert('Failed to update sprint race status. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error updating sprint race status:', error);
+        // Revert checkbox state on error
+        const checkbox = document.querySelector(`input[data-race-id="${raceId}"]`);
+        if (checkbox) {
+          checkbox.checked = !isSprintRace;
+        }
+        alert('Error updating sprint race status. Please try again.');
+      });
+    }
+
     // Add event listeners to all driver selects and form submission
     document.addEventListener('DOMContentLoaded', function() {
       // Add event listeners to all driver selects (positions 1-10)
@@ -407,12 +757,30 @@
         }
       }
       
+      // Add event listeners to all sprint driver selects (positions 1-8)
+      for (let i = 1; i <= 8; i++) {
+        const sprintDriverSelect = document.querySelector(`select[name="sprint_results[${i}][driver_id]"]`);
+        if (sprintDriverSelect) {
+          sprintDriverSelect.addEventListener('change', updateConstructorSprintResults);
+        }
+      }
+      
       // Add event listener to form submission to ensure constructor results are populated
       const form = document.querySelector('form');
       if (form) {
         form.addEventListener('submit', function(e) {
           // Force update constructor results before submission
           updateConstructorResults();
+          
+          // Check if this is a sprint race and update constructor sprint results
+          const raceId = document.getElementById('race_id_field').value;
+          const raceCard = document.querySelector(`[data-race-id="${raceId}"]`);
+          if (raceCard) {
+            const sprintCheckbox = raceCard.querySelector('.sprint-race-checkbox');
+            if (sprintCheckbox && sprintCheckbox.checked) {
+              updateConstructorSprintResults();
+            }
+          }
           
           // Validate that constructor results are populated
           let hasConstructorResults = false;
@@ -431,6 +799,33 @@
           }
         });
       }
+      
+      // Style dropdown options with team colors
+      function styleDropdownOptions() {
+        const allSelects = document.querySelectorAll('select[name*="driver_id"]');
+        allSelects.forEach(select => {
+          select.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.dataset.teamColor) {
+              // Apply team color to the selected option text
+              this.style.color = selectedOption.dataset.teamColor;
+            } else {
+              // Reset to default color if no team selected
+              this.style.color = '';
+            }
+          });
+          
+          // Style the options with team colors
+          Array.from(select.options).forEach(option => {
+            if (option.dataset.teamColor) {
+              option.style.color = option.dataset.teamColor;
+            }
+          });
+        });
+      }
+      
+      // Initialize dropdown styling
+      styleDropdownOptions();
     });
   </script>
 </div>

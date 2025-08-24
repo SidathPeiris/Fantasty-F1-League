@@ -29,29 +29,38 @@ class ApplicationController < ActionController::Base
   end
 
   def get_team_color(team_name)
-    case team_name&.downcase
-    when 'mercedes'
-      '#00D7B6' # Mercedes teal
-    when 'red bull racing', 'red bull'
-      '#4781D7' # Red Bull Racing blue
-    when 'ferrari'
-      '#ED1131' # Ferrari red
-    when 'mclaren'
-      '#F47600' # McLaren orange
-    when 'alpine'
-      '#00A1E8' # Alpine blue
-    when 'racing bulls', 'rb'
-      '#6C98FF' # Racing Bulls blue
-    when 'aston martin'
-      '#229971' # Aston Martin green
-    when 'williams'
-      '#1868DB' # Williams blue
-    when 'kick sauber', 'sauber'
-      '#01C00E' # Kick Sauber green
-    when 'haas f1 team', 'haas'
-      '#9CA3AF' # Haas gray
+    return '#9CA3AF' unless team_name # Default gray for nil
+    
+    # Try to find the constructor by name and get its team color
+    constructor = Constructor.find_by(name: team_name)
+    if constructor&.team_color
+      constructor.team_color
     else
-      '#9CA3AF' # Default gray
+      # Fallback to hardcoded values for any teams not in database
+      case team_name&.downcase
+      when 'mercedes'
+        '#00D7B6' # Mercedes teal
+      when 'red bull racing', 'red bull'
+        '#4781D7' # Red Bull Racing blue
+      when 'ferrari'
+        '#ED1131' # Ferrari red
+      when 'mclaren'
+        '#F47600' # McLaren orange
+      when 'alpine'
+        '#00A1E8' # Alpine blue
+      when 'racing bulls', 'rb'
+        '#6C98FF' # Racing Bulls blue
+      when 'aston martin'
+        '#229971' # Aston Martin green
+      when 'williams'
+        '#1868DB' # Williams blue
+      when 'kick sauber', 'sauber'
+        '#01C00E' # Kick Sauber green
+      when 'haas f1 team', 'haas'
+        '#9CA3AF' # Haas gray
+      else
+        '#9CA3AF' # Default gray
+      end
     end
   end
   

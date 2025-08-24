@@ -640,6 +640,9 @@ class PagesController < ApplicationController
     race.driver_results.destroy_all
     race.constructor_results.destroy_all
     race.qualifying_results.destroy_all
+    race.sprint_results.destroy_all
+    race.sprint_qualifying_results.destroy_all
+    race.constructor_sprint_results.destroy_all
     
     # Create driver results (Top 10)
     if params[:driver_results]
@@ -686,6 +689,52 @@ class PagesController < ApplicationController
       end
     end
     
+    # Create sprint results (Top 8) - only if it's a sprint race
+    if race.sprint_race? && params[:sprint_results]
+      params[:sprint_results].each do |position, result|
+        next if result[:driver_id].blank?
+        
+        SprintResult.create!(
+          race: race,
+          driver_id: result[:driver_id],
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
+    # Create sprint qualifying results (Top 3) - only if it's a sprint race
+    if race.sprint_race? && params[:sprint_qualifying_results]
+      params[:sprint_qualifying_results].each do |position, result|
+        next if result[:driver_id].blank?
+        
+        SprintQualifyingResult.create!(
+          race: race,
+          driver_id: result[:driver_id],
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
+    # Create constructor sprint results (Top 3) - only if it's a sprint race
+    if race.sprint_race? && params[:constructor_sprint_results]
+      params[:constructor_sprint_results].each do |position, result|
+        next if result[:constructor_name].blank?
+        
+        # Find the constructor by name
+        constructor = Constructor.find_by(name: result[:constructor_name])
+        next unless constructor
+        
+        ConstructorSprintResult.create!(
+          race: race,
+          constructor: constructor,
+          position: position.to_i,
+          points: result[:points].to_i
+        )
+      end
+    end
+    
     redirect_to "/enter-race-results", notice: "Race results for #{race.name} have been saved successfully!"
   end
 
@@ -721,11 +770,201 @@ class PagesController < ApplicationController
           driver_id: qr.driver_id,
           points: qr.points
         }
+      end,
+      sprint_results: race.sprint_results.map do |sr|
+        {
+          position: sr.position,
+          driver_id: sr.driver_id,
+          points: sr.points
+        }
+      end,
+      sprint_qualifying_results: race.sprint_qualifying_results.map do |sqr|
+        {
+          position: sqr.position,
+          driver_id: sqr.driver_id,
+          points: sqr.points
+        }
+      end,
+      constructor_sprint_results: race.constructor_sprint_results.map do |csr|
+        {
+          position: csr.position,
+          constructor_name: csr.constructor.name,
+          points: csr.points
+        }
       end
     }
     
     render json: { success: true, results: results }
   rescue => e
     render json: { success: false, message: "Error fetching race results: #{e.message}" }, status: 500
+  end
+
+  def my_stats
+    unless require_login
+      return
+    end
+    
+    @user = current_user
+    
+    @team = @user.current_team
+    
+    if @team
+      # Get all races with results
+      @races_with_results = Race.joins(:driver_results).distinct.order(:date)
+      
+      # Calculate team points for each race
+      @race_points = []
+      @total_season_points = 0
+      
+      Rails.logger.info "Found #{@races_with_results.count} races with results"
+      
+      @races_with_results.each do |race|
+        begin
+          # Get basic race data
+          race_results = race.driver_results
+          constructor_results = race.constructor_results
+          qualifying_results = race.qualifying_results
+          sprint_results = race.sprint_race? ? race.sprint_results : []
+          sprint_qualifying_results = race.sprint_race? ? race.sprint_qualifying_results : []
+          constructor_sprint_results = race.sprint_race? ? race.constructor_sprint_results : []
+          
+          # Calculate basic points manually for now
+          driver_points = 0
+          constructor_points = 0
+          qualifying_bonus = 0
+          sprint_points = 0
+          sprint_qualifying_bonus = 0
+          constructor_sprint_points = 0
+          
+          # Calculate driver points
+          @team.team_selections.where(selectable_type: 'Driver').each do |ts|
+            driver = ts.selectable
+            driver_result = race_results.find { |r| r.driver == driver.name }
+            if driver_result
+              # F1 points: 25, 18, 15, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1
+              points = [25, 18, 15, 12, 10, 8, 7, 6, 5, 4, 3, 2, 1][driver_result.position - 1] || 0
+              driver_points += points
+            end
+          end
+          
+          # Calculate constructor points
+          constructor_ts = @team.team_selections.where(selectable_type: 'Constructor').first
+          if constructor_ts
+            constructor = constructor_ts.selectable
+            constructor_result = constructor_results.find { |r| r.constructor == constructor.name }
+            if constructor_result
+              # Constructor points: 10, 5, 2
+              constructor_points = [10, 5, 2][constructor_result.position - 1] || 0
+            end
+          end
+          
+          # Calculate qualifying bonus
+          @team.team_selections.where(selectable_type: 'Driver').each do |ts|
+            driver = ts.selectable
+            qualifying_result = qualifying_results.find { |q| q.driver_id == driver.id }
+            if qualifying_result
+              # Qualifying points: 3, 2, 1
+              qualifying_bonus += [3, 2, 1][qualifying_result.position - 1] || 0
+            end
+          end
+          
+          # Calculate sprint points
+          if race.sprint_race?
+            # Get user's driver sprint results for this race
+            user_sprint_results = []
+            base_sprint_points = 0
+            @team.team_selections.where(selectable_type: 'Driver').each do |ts|
+              driver = ts.selectable
+              sprint_result = sprint_results.find { |s| s.driver_id == driver.id }
+              if sprint_result
+                # Sprint points: 8, 7, 6, 5, 4, 3, 2, 1
+                points = [8, 7, 6, 5, 4, 3, 2, 1][sprint_result.position - 1] || 0
+                user_sprint_results << { driver: driver, position: sprint_result.position, points: points }
+                base_sprint_points += points
+              end
+            end
+            
+            # Apply team-based sprint multipliers
+            sprint_multiplier = 1.0
+            if user_sprint_results.length >= 2
+              positions = user_sprint_results.map { |r| r[:position] }.sort
+              sprint_multiplier = case positions
+                when [1, 2] then 1.5
+                when [1, 3] then 1.3
+                when [2, 3] then 1.1
+                else 1.0
+              end
+              
+              if sprint_multiplier > 1.0
+                # Apply multiplier to sprint race points only
+                sprint_points = (base_sprint_points * sprint_multiplier).round(1)
+                Rails.logger.info "Sprint race multiplier applied: #{sprint_multiplier}x for positions #{positions}"
+              else
+                sprint_points = base_sprint_points
+              end
+            else
+              sprint_points = base_sprint_points
+            end
+            
+            # Sprint qualifying bonus
+            @team.team_selections.where(selectable_type: 'Driver').each do |ts|
+              driver = ts.selectable
+              sprint_qualifying_result = sprint_qualifying_results.find { |sq| sq.driver_id == driver.id }
+              if sprint_qualifying_result
+                # Sprint qualifying points: 3, 2, 1
+                sprint_qualifying_bonus += [3, 2, 1][sprint_qualifying_result.position - 1] || 0
+              end
+            end
+            
+            # Constructor sprint points
+            if constructor_ts
+              constructor = constructor_ts.selectable
+              constructor_sprint_result = constructor_sprint_results.find { |cs| cs.constructor_id == constructor.id }
+              if constructor_sprint_result
+                # Constructor sprint points: 3, 2, 1
+                constructor_sprint_points = [3, 2, 1][constructor_sprint_result.position - 1] || 0
+              end
+            end
+          end
+          
+          # Calculate total race points
+          race_total = driver_points + constructor_points + qualifying_bonus + sprint_points + sprint_qualifying_bonus + constructor_sprint_points
+          @total_season_points += race_total
+          
+          # Create score object
+          team_score = {
+            base_driver_points: driver_points,
+            multiplier: 1.0, # Simplified for now
+            multiplied_driver_points: driver_points,
+            constructor_points: constructor_points,
+            qualifying_bonus: qualifying_bonus,
+            sprint_race_points: sprint_points,
+            sprint_qualifying_bonus: sprint_qualifying_bonus,
+            constructor_sprint_points: constructor_sprint_points,
+            total_score: race_total,
+            is_sprint_race: race.sprint_race?,
+            sprint_multiplier: sprint_multiplier,
+            base_sprint_points: base_sprint_points
+          }
+          
+          Rails.logger.info "Race #{race.name}: Score = #{team_score.inspect}"
+          
+          @race_points << {
+            race: race,
+            score: team_score,
+            is_sprint_race: race.sprint_race?
+          }
+          
+        rescue => e
+          Rails.logger.error "Error calculating points for race #{race.id}: #{e.message}"
+          Rails.logger.error e.backtrace.join("\n")
+          # Skip this race if there's an error
+          next
+        end
+      end
+      
+      # Get user ranking (placeholder for now)
+      @user_ranking = "TBD" # This would be calculated based on all users' scores
+    end
   end
 end

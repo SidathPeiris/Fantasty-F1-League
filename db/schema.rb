@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_24_113522) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -49,6 +49,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
     t.index ["race_id"], name: "index_constructor_results_on_race_id"
   end
 
+  create_table "constructor_sprint_results", force: :cascade do |t|
+    t.integer "race_id", null: false
+    t.integer "constructor_id", null: false
+    t.integer "position"
+    t.integer "points"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["constructor_id"], name: "index_constructor_sprint_results_on_constructor_id"
+    t.index ["race_id"], name: "index_constructor_sprint_results_on_race_id"
+  end
+
   create_table "constructors", force: :cascade do |t|
     t.string "name"
     t.integer "base_price"
@@ -58,6 +69,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
     t.datetime "updated_at", null: false
     t.integer "championship_position"
     t.string "official_logo_url"
+    t.string "team_color"
   end
 
   create_table "driver_results", force: :cascade do |t|
@@ -116,6 +128,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
     t.string "country"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "sprint_race"
   end
 
   create_table "season_reset_logs", force: :cascade do |t|
@@ -133,6 +146,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_season_reset_messages_on_user_id"
+  end
+
+  create_table "sprint_qualifying_results", force: :cascade do |t|
+    t.integer "race_id", null: false
+    t.integer "driver_id", null: false
+    t.integer "position"
+    t.integer "points"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["driver_id"], name: "index_sprint_qualifying_results_on_driver_id"
+    t.index ["race_id"], name: "index_sprint_qualifying_results_on_race_id"
+  end
+
+  create_table "sprint_results", force: :cascade do |t|
+    t.integer "race_id", null: false
+    t.integer "driver_id", null: false
+    t.integer "position"
+    t.integer "points"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["driver_id"], name: "index_sprint_results_on_driver_id"
+    t.index ["race_id"], name: "index_sprint_results_on_race_id"
   end
 
   create_table "team_selections", force: :cascade do |t|
@@ -172,10 +207,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_22_093030) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "constructor_results", "races"
+  add_foreign_key "constructor_sprint_results", "constructors"
+  add_foreign_key "constructor_sprint_results", "races"
   add_foreign_key "driver_results", "races"
   add_foreign_key "qualifying_results", "drivers"
   add_foreign_key "qualifying_results", "races"
   add_foreign_key "season_reset_messages", "users"
+  add_foreign_key "sprint_qualifying_results", "drivers"
+  add_foreign_key "sprint_qualifying_results", "races"
+  add_foreign_key "sprint_results", "drivers"
+  add_foreign_key "sprint_results", "races"
   add_foreign_key "team_selections", "teams"
   add_foreign_key "teams", "users"
 end
