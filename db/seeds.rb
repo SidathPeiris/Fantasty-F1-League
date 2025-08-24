@@ -51,3 +51,7 @@ puts "Updating all ratings with new system..."
 F1DataService.update_all_ratings!
 puts "All ratings updated successfully!"
 
+# Note: Race data (races, results, qualifying) is seeded separately
+# Run 'bin/rails db:seed:race_data' to populate race data
+# Run 'bin/rails db:seed:all' to populate everything
+
